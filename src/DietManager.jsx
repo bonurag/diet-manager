@@ -174,28 +174,33 @@ export default function App() {
   const toggleExcl = k => setExcl(p=>{ const n={...p}; n[k]?delete n[k]:n[k]=true; return n; });
   const exclInRange = (from,to) => { const cur=new Date(from),res=[]; while(cur<=to){const d=dk(cur);if(excl[d])res.push(d);cur.setDate(cur.getDate()+1);} return res; };
 
-  // Load persisted data — Tauri: try .md from disk first; browser: localStorage
+  // Load persisted data — Tauri: .md da disco; browser: JSON da localStorage
   useEffect(() => {
     (async () => {
-      // Try to auto-load diet from disk (.md) when running in Tauri
-      const mdKey = await store.get("dm-diet-md-filename");
-      if (mdKey) {
-        const mdText = await tauriReadMd(mdKey);
+      let dietLoaded = false;
+      // 1. Prova a caricare dal .md su disco (Tauri)
+      const mdFilename = await store.get("dm-diet-md-filename");
+      if (mdFilename) {
+        const mdText = await tauriReadMd(mdFilename);
         if (mdText) {
           try {
             const parsed = markdownToDiet(mdText);
             setDiet(parsed);
             if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
             if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
-          } catch { /* fallback to JSON below */ }
+            dietLoaded = true;
+          } catch { /* fallback sotto */ }
         }
       }
-      const d  = await store.get("dm-diet");  if(d)  setDiet(d);
+      // 2. Fallback JSON localStorage
+      if (!dietLoaded) {
+        const d = await store.get("dm-diet"); if(d) setDiet(d);
+      }
       const c  = await store.get("dm-cal");   if(c)  setCal(c);
       const w  = await store.get("dm-wts");   if(w)  setWts(w);
       const p  = await store.get("dm-plan");  if(p)  { setPlanS(p.s||""); setPlanE(p.e||""); }
       const n  = await store.get("dm-notes"); if(n)  setNotes(n);
-      const v  = await store.get("dm-view");  if(v&&d) setView(v);
+      const v  = await store.get("dm-view");  if(v)  setView(v);
       const pr = await store.get("dm-prices"); if(pr) setPrices(pr);
     })();
   }, []);
