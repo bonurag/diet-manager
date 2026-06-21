@@ -41,7 +41,8 @@ const ACTS = {
   other:       { c:"#6b7280", bg:"rgba(107,114,128,.11)", label:"Altro" },
 };
 const getAct = t => ACTS[t] || ACTS.other;
-const DOW_ACT = {0:"run",1:"tabata",2:"endurance",3:"rest",4:"repetitions",5:"tabata",6:"bike"};
+const DEFAULT_DOW_ACT = {0:"run",1:"tabata",2:"endurance",3:"rest",4:"repetitions",5:"tabata",6:"bike"};
+const DOW_LABELS = [[1,"Lunedì"],[2,"Martedì"],[3,"Mercoledì"],[4,"Giovedì"],[5,"Venerdì"],[6,"Sabato"],[0,"Domenica"]];
 
 const dk = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 const pd = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
@@ -67,6 +68,68 @@ function findPriceFor(prices, foodName){
   if(p) return p;
   p = prices.prodotti.find(x=>x.nomePiano && (n.includes(norm(x.nomePiano))||norm(x.nomePiano).includes(n)));
   return p||null;
+}
+
+const DIET_AI_PROMPT = `Analizza questo piano alimentare ed estrai i dati nel formato JSON seguente. Usa null per i valori assenti. Non inventare numeri. Restituisci SOLO JSON valido, nessun testo aggiuntivo.
+
+{"patient":{"name":null,"weight":null,"targetWeight":null,"height":null,"bmi":null,"bmr":null,"fat":null,"ffm":null},"period":{"startDate":null,"checkupDate":null,"checkupTime":null},"avgKcal":null,"macros":{"protein":null,"carbs":null,"fats":null},"days":[{"n":1,"activity":"descrizione attività","activityType":"rest","kcal":null,"macros":{"prot":null,"carb":null,"fat":null},"meals":[{"name":"Colazione","icon":"☀️","foods":[{"name":"alimento","qty":"150g","kcal":null,"isSupplement":false}]}],"condiments":{},"supplements":[]}]}
+
+Regole:
+- Estrai TUTTI i giorni presenti nel documento
+- activityType: rest=riposo/giorno libero, tabata=HIIT/tabata/cyclette alta intensità, endurance=corsa lenta o lunga distanza, repetitions=ripetute velocità, bike=ciclismo/bici da corsa, run=corsa lunga, weights=palestra/pesi/resistance training, other=qualsiasi altro sport o attività non classificabile
+- icon pasto: ☀️=colazione, 🥗=pranzo, 🍽️=cena, 🍎=spuntino mattutino, 🌙=spuntino serale, ⚡=pre o post allenamento
+- isSupplement=true per: proteine whey, creatina, gel energetici, barrette sportive, BCAA, aminoacidi, multivitaminici, integratori sportivi
+- condiments: oggetto nome→grammi SOLO per condimenti con dose giornaliera esplicita (es. {"Olio EVO":10,"Parmigiano":5}); {} se assenti
+- supplements: array di nomi integratori del giorno (non alimenti normali)
+- Tutti i campi numerici devono essere numeri o null, mai stringhe vuote`;
+
+const SUPPLEMENT_URLS = {
+  "proteine del siero":    "https://www.yamamotonutrition.com/it_it/yamamoto-nutrition-iso-fuji-volactiver-700-grammi-p00032643",
+  "prostar whey":          "https://www.yamamotonutrition.com/it_it/yamamoto-nutrition-iso-fuji-volactiver-700-grammi-p00032643",
+  "yamamoto":              "https://www.yamamotonutrition.com/it_it/yamamoto-nutrition-iso-fuji-volactiver-700-grammi-p00032643",
+  "carbogel":              "https://www.scienceinsport.com/it/shop-sis/go-range/gel-beta-fuel-sis",
+  "gel beta fuel":         "https://www.scienceinsport.com/it/shop-sis/go-range/gel-beta-fuel-sis",
+  "barretta energetica":   "https://www.scienceinsport.com/it/compra-su-sis/go-range/go-energy-bars/beta-fuel-energy-bar-sis",
+  "beta fuel energy bar":  "https://www.scienceinsport.com/it/compra-su-sis/go-range/go-energy-bars/beta-fuel-energy-bar-sis",
+  "isocarb":               "https://www.redcare.it/fitness/IT981043351/enervit-isocarb-c2-1pro.htm",
+  "enervit isocarb":       "https://www.redcare.it/fitness/IT981043351/enervit-isocarb-c2-1pro.htm",
+};
+const getSupplementUrl = name => {
+  const n = norm(name);
+  for(const [key, url] of Object.entries(SUPPLEMENT_URLS)) {
+    if(n.includes(norm(key))) return url;
+  }
+  return null;
+};
+
+async function callAI(content) {
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": import.meta.env.VITE_ANTHROPIC_KEY,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({ model: MODEL, max_tokens: 8000, messages: [{ role: "user", content }] })
+  });
+  if (!resp.ok) { const t = await resp.text(); throw new Error(`API ${resp.status}: ${t.substring(0,120)}`); }
+  const data = await resp.json();
+  const txt = data.content?.find(c => c.type === "text")?.text || "";
+  return JSON.parse(txt.replace(/```json\n?/g,"").replace(/```\n?/g,"").trim());
+}
+
+function saveDiet(parsed, setDiet, setPlanS, setPlanE) {
+  const md = dietToMarkdown(parsed);
+  const filename = `piano_${(parsed.patient?.name||"dieta").replace(/\s+/g,"_").toLowerCase()}.md`;
+  setDiet(parsed);
+  store.set("dm-diet", parsed);
+  store.set("dm-diet-md", md);
+  store.set("dm-diet-md-filename", filename);
+  tauriWriteMd(filename, md);
+  if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
+  if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
+  return { md, filename };
 }
 
 function dietToMarkdown(d) {
@@ -122,21 +185,21 @@ const S = {
   sbL:{ fontSize:9,color:"#6e7681",textTransform:"uppercase",letterSpacing:"0.07em",marginTop:2 },
   btn:{ background:"#238636",border:"1px solid #2ea043",borderRadius:6,padding:"6px 13px",fontSize:12,fontWeight:600,color:"#fff",cursor:"pointer" },
   btnB:{ background:"#1f6feb",border:"1px solid #388bfd",borderRadius:6,padding:"6px 13px",fontSize:12,fontWeight:600,color:"#fff",cursor:"pointer" },
-  btnG:{ background:"transparent",border:"1px solid #30363d",borderRadius:6,padding:"5px 9px",fontSize:12,fontWeight:600,color:"#8b949e",cursor:"pointer" },
+  btnG:{ background:"transparent",borderWidth:"1px",borderStyle:"solid",borderColor:"#30363d",borderRadius:6,padding:"5px 9px",fontSize:12,fontWeight:600,color:"#8b949e",cursor:"pointer" },
   inp:{ background:"#0d1117",border:"1px solid #30363d",borderRadius:6,padding:"6px 9px",fontSize:12,color:"#c9d1d9",outline:"none" },
   lbl:{ fontSize:10,color:"#6e7681",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.06em",display:"block",marginBottom:3 },
   row:{ display:"flex",gap:8,alignItems:"center",flexWrap:"wrap" },
   muted:{ color:"#6e7681" },
   cg:{ display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:2 },
   cdow:{ textAlign:"center",fontSize:10,fontWeight:700,color:"#6e7681",padding:"3px 0" },
-  dc:{ aspectRatio:"1",borderRadius:4,border:"1px solid #21262d",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:1,padding:2,transition:"all .12s" },
+  dc:{ aspectRatio:"1",borderRadius:4,borderWidth:"1px",borderStyle:"solid",borderColor:"#21262d",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:1,padding:2,transition:"all .12s" },
   dcE:{ border:"none",background:"transparent",cursor:"default",aspectRatio:"1" },
   mc:{ background:"#0d1117",border:"1px solid #21262d",borderRadius:6,marginBottom:6,overflow:"hidden" },
   mh:{ padding:"5px 10px",background:"#161b22",display:"flex",justifyContent:"space-between",alignItems:"center" },
   fi:{ display:"grid",gridTemplateColumns:"1fr auto auto",gap:8,padding:"5px 10px",borderBottom:"1px solid #161b22",fontSize:12,alignItems:"center" },
   si:{ display:"grid",gridTemplateColumns:"20px 1fr auto auto",gap:6,padding:"5px 10px",borderBottom:"1px solid #161b22",cursor:"pointer",alignItems:"center",fontSize:12 },
-  cb:{ width:15,height:15,borderRadius:3,border:"1.5px solid #30363d",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,flexShrink:0 },
-  dz:{ border:"2px dashed #30363d",borderRadius:10,padding:"32px 20px",textAlign:"center",cursor:"pointer",transition:"all .2s" },
+  cb:{ width:15,height:15,borderRadius:3,borderWidth:"1.5px",borderStyle:"solid",borderColor:"#30363d",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,flexShrink:0 },
+  dz:{ borderWidth:"2px",borderStyle:"dashed",borderColor:"#30363d",borderRadius:10,padding:"32px 20px",textAlign:"center",cursor:"pointer",transition:"all .2s" },
 };
 
 export default function App() {
@@ -157,6 +220,8 @@ export default function App() {
   const [wtN, setWtN]     = useState("");
   const [showSup, setShowSup] = useState(true);
   const [manDay, setManDay]   = useState(null);
+  const [dowAct, setDowAct]   = useState(DEFAULT_DOW_ACT);
+  const [showCalCfg, setShowCalCfg] = useState(false);
   const [drag, setDrag]   = useState(false);
   const [notes, setNotes] = useState({});
   const [excl, setExcl]   = useState({});
@@ -185,9 +250,7 @@ export default function App() {
         if (mdText) {
           try {
             const parsed = markdownToDiet(mdText);
-            setDiet(parsed);
-            if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
-            if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
+            saveDiet(parsed, setDiet, setPlanS, setPlanE);
             dietLoaded = true;
           } catch { /* fallback sotto */ }
         }
@@ -198,14 +261,27 @@ export default function App() {
           const r = await fetch("/piano.md", { cache: "no-store" });
           if (r.ok) {
             const text = await r.text();
-            const parsed = markdownToDiet(text);
-            setDiet(parsed);
-            if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
-            if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
-            store.set("dm-diet-md", text);
-            dietLoaded = true;
+            try {
+              // Caso A: MD generato dall'app → ha blocco <!-- diet-json -->
+              const parsed = markdownToDiet(text);
+              saveDiet(parsed, setDiet, setPlanS, setPlanE);
+              dietLoaded = true;
+            } catch {
+              // Caso B: MD scritto a mano → usa AI (richiede crediti API)
+              setLoading(true);
+              setLmsg("Analisi piano.md con AI — operazione una tantum...");
+              try {
+                const parsed = await callAI([
+                  {type:"text", text: DIET_AI_PROMPT + "\n\nContenuto:\n\n" + text}
+                ]);
+                saveDiet(parsed, setDiet, setPlanS, setPlanE);
+                dietLoaded = true;
+              } catch(aiErr) {
+                console.warn("AI parse fallita:", aiErr.message);
+              } finally { setLoading(false); }
+            }
           }
-        } catch { /* non presente, continua */ }
+        } catch(fetchErr) { console.warn("Fetch piano.md fallita:", fetchErr.message); setLoading(false); }
       }
       // 3. Fallback JSON localStorage
       if (!dietLoaded) {
@@ -213,20 +289,25 @@ export default function App() {
       }
       const c  = await store.get("dm-cal");   if(c)  setCal(c);
       const w  = await store.get("dm-wts");   if(w)  setWts(w);
-      const p  = await store.get("dm-plan");  if(p)  { setPlanS(p.s||""); setPlanE(p.e||""); }
+      // Le date vengono già dal JSON del piano quando dietLoaded=true; leggo dm-plan solo come fallback
+      if (!dietLoaded) {
+        const p = await store.get("dm-plan"); if(p)  { setPlanS(p.s||""); setPlanE(p.e||""); }
+      }
       const n  = await store.get("dm-notes"); if(n)  setNotes(n);
       const v  = await store.get("dm-view");  if(v)  setView(v);
       const pr = await store.get("dm-prices"); if(pr) setPrices(pr);
+      const da = await store.get("dm-dow-act"); if(da) setDowAct(da);
     })();
   }, []);
 
   useEffect(() => { if(diet) store.set("dm-diet", diet); }, [diet]);
   useEffect(() => { store.set("dm-cal",  cal);   }, [cal]);
   useEffect(() => { store.set("dm-wts",  wts);   }, [wts]);
-  useEffect(() => { store.set("dm-plan", {s:planS,e:planE}); }, [planS,planE]);
+  useEffect(() => { if(planS||planE) store.set("dm-plan", {s:planS,e:planE}); }, [planS,planE]);
   useEffect(() => { store.set("dm-notes",notes); }, [notes]);
   useEffect(() => { if(view!=="up") store.set("dm-view",view); }, [view]);
   useEffect(() => { store.set("dm-prices", prices); }, [prices]);
+  // dm-dow-act viene salvato esplicitamente al cambio (non via effect, evita race condition con startup useEffect)
 
   // Parse PDF with Claude AI
   const parsePDF = useCallback(async (file) => {
@@ -234,44 +315,11 @@ export default function App() {
     try {
       const b64 = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result.split(",")[1]); r.onerror=rej; r.readAsDataURL(file); });
       setLmsg("Analisi AI in corso — può richiedere 30-60 secondi...");
-      const resp = await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST", headers:{
-          "Content-Type":"application/json",
-          "x-api-key": import.meta.env.VITE_ANTHROPIC_KEY,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true"
-        },
-        body:JSON.stringify({ model:MODEL, max_tokens:8000,
-          messages:[{role:"user",content:[
-            {type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},
-            {type:"text",text:`Analizza questo piano alimentare PDF ed estrai i dati nel formato JSON seguente. Usa null per i valori assenti. Non inventare numeri. Restituisci SOLO JSON valido, nessun testo aggiuntivo.
-
-{"patient":{"name":null,"weight":null,"targetWeight":null,"height":null,"bmi":null,"bmr":null,"fat":null,"ffm":null},"period":{"startDate":null,"checkupDate":null,"checkupTime":null},"avgKcal":null,"macros":{"protein":null,"carbs":null,"fats":null},"days":[{"n":1,"activity":"descrizione attività","activityType":"rest","kcal":null,"macros":{"prot":null,"carb":null,"fat":null},"meals":[{"name":"Colazione","icon":"☀️","foods":[{"name":"alimento","qty":"150g","kcal":null,"isSupplement":false}]}],"condiments":{},"supplements":[]}]}
-
-Regole:
-- Estrai TUTTI i giorni presenti nel PDF
-- activityType: rest=riposo/giorno libero, tabata=HIIT/tabata/cyclette alta intensità, endurance=corsa lenta o lunga distanza, repetitions=ripetute velocità, bike=ciclismo/bici da corsa, run=corsa lunga, weights=palestra/pesi/resistance training, other=qualsiasi altro sport o attività non classificabile
-- icon pasto: ☀️=colazione, 🥗=pranzo, 🍽️=cena, 🍎=spuntino mattutino, 🌙=spuntino serale, ⚡=pre o post allenamento
-- isSupplement=true per: proteine whey, creatina, gel energetici, barrette sportive, BCAA, aminoacidi, multivitaminici, integratori sportivi
-- condiments: oggetto nome→grammi SOLO per condimenti con dose giornaliera esplicita (es. {"Olio EVO":10,"Parmigiano":5}); {} se assenti
-- supplements: array di nomi integratori del giorno (non alimenti normali)
-- Tutti i campi numerici devono essere numeri o null, mai stringhe vuote`}
-          ]}]
-        })
-      });
-      if(!resp.ok){ const t=await resp.text(); throw new Error(`API ${resp.status}: ${t.substring(0,120)}`); }
-      const data = await resp.json();
-      const txt = data.content?.find(c=>c.type==="text")?.text||"";
-      const clean = txt.replace(/```json\n?/g,"").replace(/```\n?/g,"").trim();
-      const parsed = JSON.parse(clean);
-      setDiet(parsed);
-      const md = dietToMarkdown(parsed);
-      const mdFilename = `piano_${(parsed.patient?.name||"dieta").replace(/\s+/g,"_").toLowerCase()}.md`;
-      store.set("dm-diet-md", md);
-      store.set("dm-diet-md-filename", mdFilename);
-      tauriWriteMd(mdFilename, md);
-      if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
-      if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
+      const parsed = await callAI([
+        {type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},
+        {type:"text",text:DIET_AI_PROMPT}
+      ]);
+      saveDiet(parsed, setDiet, setPlanS, setPlanE);
       setLmsg("✓ Piano caricato!");
       setTimeout(()=>{ setLoading(false); setView("ov"); },500);
     } catch(err){
@@ -285,15 +333,15 @@ Regole:
     setLoading(true); setLmsg("Lettura file Markdown...");
     try {
       const text = await file.text();
-      const parsed = markdownToDiet(text);
-      const mdFilename = `piano_${(parsed.patient?.name||"dieta").replace(/\s+/g,"_").toLowerCase()}.md`;
-      setDiet(parsed);
-      store.set("dm-diet-md", text);
-      store.set("dm-diet-md-filename", mdFilename);
-      tauriWriteMd(mdFilename, text);
-      if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
-      if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
-      setLmsg("✓ Piano caricato dal Markdown!");
+      let parsed;
+      try {
+        parsed = markdownToDiet(text); // ha blocco diet-json → parsing istantaneo
+      } catch {
+        setLmsg("Analisi AI del Markdown — operazione una tantum...");
+        parsed = await callAI([{type:"text", text: DIET_AI_PROMPT + "\n\nContenuto:\n\n" + text}]);
+      }
+      saveDiet(parsed, setDiet, setPlanS, setPlanE);
+      setLmsg("✓ Piano caricato!");
       setTimeout(()=>{ setLoading(false); setView("ov"); }, 500);
     } catch(err) {
       console.error(err);
@@ -302,20 +350,24 @@ Regole:
     }
   }, []);
 
-  // Generate calendar automatically
+  // Generate calendar automatically — random shuffle + configurable day constraints
   const genCal = useCallback(()=>{
     if(!diet||!planS) return;
     const start=pd(planS), end=planE?pd(planE):new Date(pd(planS).getTime()+77*864e5);
-    const byType={}; diet.days?.forEach(d=>{ const t=d.activityType||"rest"; if(!byType[t]) byType[t]=[]; byType[t].push(d.n); });
+    const byType={};
+    diet.days?.forEach(d=>{ const t=d.activityType||"rest"; if(!byType[t]) byType[t]=[]; byType[t].push(d.n); });
+    // Fisher-Yates shuffle per ogni pool → assegnazione casuale
+    const shuffle = arr => { const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+    const pools={}; Object.entries(byType).forEach(([t,days])=>{ pools[t]=shuffle(days); });
     const nc={}, ri={}, cur=new Date(start);
     while(cur<=end){
-      const act=DOW_ACT[cur.getDay()]||"rest";
-      const pool=byType[act]||byType["rest"]||[];
+      const act=dowAct[cur.getDay()]||"rest";
+      const pool=pools[act]||pools["rest"]||[];
       if(pool.length){ nc[dk(cur)]=pool[(ri[act]||0)%pool.length]; ri[act]=(ri[act]||0)+1; }
       cur.setDate(cur.getDate()+1);
     }
     setCal(nc);
-  },[diet,planS,planE]);
+  },[diet,planS,planE,dowAct]);
 
   const dayFor = useCallback(d => { const gn=cal[dk(d)]; if(!gn||!diet) return null; return diet.days?.find(x=>x.n===gn)||null; },[cal,diet]);
 
@@ -366,7 +418,7 @@ Regole:
     const s=planS?pd(planS):new Date(), e=planE?pd(planE):new Date(s.getTime()+77*864e5); return[s,e];
   },[shopM,shopDt,planS,planE]);
 
-  const reset = ()=>{ setDiet(null);setCal({});setWts([]);setNotes({});setView("up"); ["dm-diet","dm-cal","dm-wts","dm-plan","dm-notes","dm-view"].forEach(k=>store.del(k)); };
+  const reset = ()=>{ setDiet(null);setCal({});setWts([]);setNotes({});setView("up");setDowAct(DEFAULT_DOW_ACT); ["dm-diet","dm-cal","dm-wts","dm-plan","dm-notes","dm-view","dm-dow-act"].forEach(k=>store.del(k)); };
 
   // ── LOADING ──
   if(loading) return (
@@ -488,7 +540,7 @@ Regole:
   const CalV = () => {
     const {y,m}=nav;
     const lastD=new Date(y,m+1,0).getDate();
-    const startDow=new Date(y,m,1).getDay();
+    const startDow=(new Date(y,m,1).getDay()+6)%7;
     const todayDk=dk(new Date()), selDk=dk(selDt);
     const selDay=dayFor(selDt), selAct=selDay?(ACTS[selDay.activityType]||ACTS.rest):null;
     return (
@@ -503,9 +555,36 @@ Regole:
             </div>
             <div style={S.row}>
               <button style={S.btn} onClick={genCal}>↻ Rigenera</button>
+              <button style={{...S.btnG,fontSize:12,...(showCalCfg?{borderColor:"#58a6ff",color:"#58a6ff"}:{})}} onClick={()=>setShowCalCfg(p=>!p)}>⚙️ Vincoli</button>
               {manDay&&<span style={{color:"#fb923c",fontWeight:700,fontSize:12,background:"rgba(251,146,60,.1)",border:"1px solid rgba(251,146,60,.3)",borderRadius:6,padding:"3px 8px"}}>G.{manDay} → clicca giorno <button style={{...S.btnG,padding:"0 5px",fontSize:10,marginLeft:4}} onClick={()=>setManDay(null)}>✕</button></span>}
             </div>
           </div>
+          {/* Pannello vincoli generazione */}
+          {showCalCfg&&<div style={{background:"#0d1117",borderRadius:6,padding:"10px 12px",marginBottom:10,border:"1px solid #30363d"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <span style={{fontSize:11,fontWeight:700,color:"#58a6ff",textTransform:"uppercase",letterSpacing:"0.07em"}}>⚙️ Vincoli — Attività per giorno</span>
+              <button style={{...S.btnG,fontSize:10,padding:"2px 7px"}} onClick={()=>{ setDowAct(DEFAULT_DOW_ACT); store.set("dm-dow-act",DEFAULT_DOW_ACT); }}>↺ Reset</button>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:"4px 16px"}}>
+              {DOW_LABELS.map(([dow,label])=>{
+                const cur=dowAct[dow]||"rest";
+                const curAct=getAct(cur);
+                return (
+                  <div key={dow} style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:11,color:"#8b949e",width:68,flexShrink:0,fontWeight:600}}>{label}</span>
+                    <select value={cur} onChange={e=>{ const nd={...dowAct,[dow]:e.target.value}; setDowAct(nd); store.set("dm-dow-act",nd); }}
+                      style={{...S.inp,padding:"3px 6px",fontSize:11,flex:1,minWidth:0,color:curAct.c,background:"#161b22"}}>
+                      {Object.entries(ACTS).map(([k,a])=>{
+                        const pool=diet?.days?.filter(d=>d.activityType===k)||[];
+                        return <option key={k} value={k} style={{color:"#c9d1d9",background:"#161b22"}}>{a.label}{pool.length?` (G.${pool.map(d=>d.n).join(",")})`:""}</option>;
+                      })}
+                    </select>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{marginTop:8,fontSize:10,color:"#6e7681"}}>I giorni con un solo giorno disponibile (es. Lungo BDC, Lungo RUN) vengono sempre assegnati. La generazione è casuale: ogni click su Rigenera produce un piano diverso.</div>
+          </div>}
           {/* Assign buttons */}
           <div style={{display:"flex",gap:3,flexWrap:"wrap",marginBottom:10}}>
             <span style={{...S.muted,fontSize:10,alignSelf:"center"}}>Assegna manualmente:</span>
@@ -581,6 +660,7 @@ Regole:
               <div style={{background:act?.bg,border:`1px solid ${act?.c}44`,borderRadius:6,padding:"4px 9px",fontSize:11,fontWeight:700,color:act?.c}}>G.{day.n} · {day.activity}</div>
               <span style={{...S.muted,fontSize:11}}>⚡ {day.kcal} kcal</span>
             </div>}
+            <button style={{...S.btnG,marginLeft:"auto",fontSize:11,padding:"4px 10px"}} onClick={()=>setView("shop")}>🛒 Spesa →</button>
           </div>
         </div>
         {!day&&<div style={{...S.card,...S.cardP,textAlign:"center",color:"#6e7681"}}>Nessun piano assegnato. <button style={{...S.btnG,marginLeft:8}} onClick={()=>setView("cal")}>Vai al Calendario →</button></div>}
@@ -591,16 +671,17 @@ Regole:
               <div style={{fontWeight:700,fontSize:12}}>{meal.icon} {meal.name}</div>
               <div style={{fontSize:11,color:"#6e7681",background:"#21262d",borderRadius:10,padding:"1px 7px"}}>{mk} kcal</div>
             </div>
-            {meal.foods?.map((f,fi)=>(
+            {meal.foods?.map((f,fi)=>{ const sUrl=f.isSupplement?getSupplementUrl(f.name):null; return (
               <div key={fi} style={{...S.fi,background:f.isSupplement?"rgba(88,166,255,.04)":"transparent"}}>
-                <div style={{color:f.isSupplement?"#58a6ff":"#c9d1d9"}}>
-                  {f.isSupplement&&<span style={{fontSize:8,background:"rgba(31,111,235,.2)",color:"#58a6ff",borderRadius:3,padding:"1px 4px",marginRight:4,fontWeight:700}}>SPORT</span>}
+                <div style={{color:f.isSupplement?"#58a6ff":"#c9d1d9",display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
+                  {f.isSupplement&&<span style={{fontSize:8,background:"rgba(31,111,235,.2)",color:"#58a6ff",borderRadius:3,padding:"1px 4px",fontWeight:700}}>SPORT</span>}
                   {f.name}
+                  {sUrl&&<a href={sUrl} target="_blank" rel="noopener noreferrer" style={{fontSize:9,color:"#58a6ff",textDecoration:"none",background:"rgba(31,111,235,.15)",borderRadius:3,padding:"1px 5px"}} title="Acquista prodotto">🔗</a>}
                 </div>
                 <div style={{color:"#d29922",fontWeight:600,fontSize:11}}>{f.qty}</div>
                 <div style={{color:"#6e7681",fontSize:10}}>{f.kcal>0?f.kcal+" kc":""}</div>
               </div>
-            ))}
+            );})}
           </div>;
         })}
         {day?.condiments&&Object.keys(day.condiments).length>0&&(
@@ -688,6 +769,7 @@ Regole:
             ))}
             {shopM!=="plan"&&<input type="date" style={{...S.inp,marginLeft:"auto"}} value={shopDt} onChange={e=>setShopDt(e.target.value)}/>}
             <button style={{...S.btnG,...(showSup?{borderColor:"#238636",color:"#2ea043"}:{})}} onClick={()=>setShowSup(p=>!p)}>{showSup?"👁 Tutti":"👁 Solo cibo"}</button>
+            <button style={{...S.btnG,fontSize:11,padding:"4px 10px"}} onClick={()=>setView("meals")}>← 🍽 Pasti</button>
           </div>
 
           {/* Esclusione giorni — settimana */}
@@ -772,14 +854,16 @@ Regole:
 
         {showSup&&supp.length>0&&<div style={S.card}>
           <div style={{...S.cardH,background:"rgba(88,166,255,.06)"}}><span style={{color:"#58a6ff"}}>⚡ Integratori ({supp.length}) — Non al Conad</span></div>
-          {supp.map(item=>(
-            <div key={item.name} onClick={()=>tog(item.name)} style={{...S.si,background:"rgba(88,166,255,.03)",...(chk[item.name]?{opacity:.6}:{})}}>
-              <div style={{...S.cb,...(chk[item.name]?{background:"#238636",borderColor:"#238636",color:"#fff"}:{})}}>✓</div>
-              <div style={{color:"#58a6ff",...(chk[item.name]?{textDecoration:"line-through",color:"#6e7681"}:{})}}>{item.name}{item.count>1&&<span style={{...S.muted,fontSize:10,marginLeft:4}}>×{item.count}</span>}</div>
+          {supp.map(item=>{ const sUrl=getSupplementUrl(item.name); return (
+            <div key={item.name} style={{...S.si,background:"rgba(88,166,255,.03)",...(chk[item.name]?{opacity:.6}:{}),gridTemplateColumns:"20px 1fr auto auto auto"}}>
+              <div onClick={()=>tog(item.name)} style={{...S.cb,...(chk[item.name]?{background:"#238636",borderColor:"#238636",color:"#fff"}:{}),cursor:"pointer"}}>✓</div>
+              <div onClick={()=>tog(item.name)} style={{color:"#58a6ff",...(chk[item.name]?{textDecoration:"line-through",color:"#6e7681"}:{}),cursor:"pointer"}}>{item.name}{item.count>1&&<span style={{...S.muted,fontSize:10,marginLeft:4}}>×{item.count}</span>}</div>
               <div style={{color:"#d29922",fontWeight:600,fontSize:11}}>{item.qty}</div>
-              <div style={{...S.muted,fontSize:10}}>amazon/farmacia</div>
+              <div style={{...S.muted,fontSize:10}}>{sUrl?"":"amazon/farmacia"}</div>
+              {sUrl?<a href={sUrl} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()} style={{fontSize:10,color:"#58a6ff",textDecoration:"none",background:"rgba(31,111,235,.2)",borderRadius:4,padding:"2px 7px",fontWeight:600,whiteSpace:"nowrap"}}>🔗 Acquista</a>:<div/>}
             </div>
-          ))}
+          );})}
+
         </div>}
         {visible.length===0&&<div style={{...S.card,...S.cardP,textAlign:"center",color:"#6e7681",fontSize:12}}>
           {exclCount>0&&exclCount===rangeDays.length?"Tutti i giorni sono esclusi — clicca i pill sopra per includerli.":"Nessun ingrediente. Genera il calendario prima e seleziona un periodo valido."}
@@ -853,9 +937,15 @@ Regole:
           <div style={{...S.cardT,color:"#58a6ff"}}>⚡ Integratori nel Piano</div>
           <div style={{...S.muted,fontSize:11,marginBottom:10}}>Non disponibili al Conad — acquisto online (amazon.it, decathlon.it) o in farmacia</div>
           {sl.length===0&&<div style={{...S.muted,fontSize:12}}>Nessun integratore trovato. L'AI marca come SPORT: proteine in polvere, gel, barrette energetiche sportive, creatina.</div>}
-          {sl.map(s=>{ const uses=Object.entries(cal).filter(([,gn])=>s.days.includes(gn)).length; return (
+          {sl.map(s=>{ const uses=Object.entries(cal).filter(([,gn])=>s.days.includes(gn)).length; const sUrl=getSupplementUrl(s.name); return (
             <div key={s.name} style={{...S.mc,marginBottom:8}}>
-              <div style={{...S.mh,background:"rgba(88,166,255,.07)"}}><span style={{color:"#58a6ff",fontWeight:700,fontSize:12}}>{s.name}</span><span style={{...S.muted,fontSize:10}}>Dose: {s.qty} · G.{s.days.join(", G.")}</span></div>
+              <div style={{...S.mh,background:"rgba(88,166,255,.07)"}}>
+                <span style={{color:"#58a6ff",fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:6}}>
+                  {s.name}
+                  {sUrl&&<a href={sUrl} target="_blank" rel="noopener noreferrer" style={{fontSize:10,color:"#58a6ff",textDecoration:"none",background:"rgba(31,111,235,.2)",borderRadius:4,padding:"1px 7px",fontWeight:600}}>🔗 Acquista</a>}
+                </span>
+                <span style={{...S.muted,fontSize:10}}>Dose: {s.qty} · G.{s.days.join(", G.")}</span>
+              </div>
               <div style={{...S.cardP,display:"flex",gap:6}}>
                 {[["Giorni piano",s.days.length,"#58a6ff"],["Usi nel periodo",uses,"#2ea043"],["Dose/uso",s.qty,"#d29922"]].map(([l,v,c])=>(
                   <div key={l} style={S.sb}><div style={{...S.sbN,color:c,fontSize:13}}>{v}</div><div style={S.sbL}>{l}</div></div>
@@ -1008,13 +1098,29 @@ Regole:
 
   // Modale per aggiunta nuovo prodotto
   const PriceAddModal = ({initialDesc,onSave,onCancel}) => {
+    const findIva = (pianoVal) => {
+      if(!pianoVal?.trim()) return null;
+      const n=norm(pianoVal);
+      let m=prices.prodotti.find(p=>p.nomePiano&&norm(p.nomePiano)===n);
+      if(!m) m=prices.prodotti.find(p=>p.nomePiano&&(n.includes(norm(p.nomePiano))||norm(p.nomePiano).includes(n)));
+      return m?.iva||null;
+    };
     const [desc,setDesc]=useState(initialDesc||"");
     const [piano,setPiano]=useState(initialDesc||"");
     const [prezzo,setPrezzo]=useState("");
     const [unita,setUnita]=useState("pezzo");
-    const [iva,setIva]=useState("A");
     const [cat,setCat]=useState("altro");
     const [note,setNote]=useState("");
+    const [ivaAuto,setIvaAuto]=useState(()=>!!findIva(initialDesc));
+    const [iva,setIva]=useState(()=>findIva(initialDesc)||"A");
+
+    const handlePianoChange = (val) => {
+      setPiano(val);
+      const found=findIva(val);
+      if(found){ setIva(found); setIvaAuto(true); }
+      else setIvaAuto(false);
+    };
+
     return (
       <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:14}} onClick={e=>{if(e.target===e.currentTarget)onCancel();}}>
         <div style={{background:"#161b22",border:"1px solid #30363d",borderRadius:10,padding:18,maxWidth:380,width:"100%"}}>
@@ -1022,7 +1128,7 @@ Regole:
           <label style={S.lbl}>Descrizione scontrino *</label>
           <input style={{...S.inp,width:"100%",marginBottom:8}} value={desc} onChange={e=>setDesc(e.target.value)} placeholder="es. ZUCCHINE SCURE"/>
           <label style={S.lbl}>Nome nel piano (opzionale)</label>
-          <input style={{...S.inp,width:"100%",marginBottom:8}} value={piano} onChange={e=>setPiano(e.target.value)} placeholder="lascia vuoto se non presente nel piano"/>
+          <input style={{...S.inp,width:"100%",marginBottom:8}} value={piano} onChange={e=>handlePianoChange(e.target.value)} placeholder="lascia vuoto se non presente nel piano"/>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
             <div><label style={S.lbl}>Prezzo (€) *</label><input style={{...S.inp,width:"100%"}} type="number" step="0.01" value={prezzo} onChange={e=>setPrezzo(e.target.value)}/></div>
             <div><label style={S.lbl}>Unità</label>
@@ -1037,9 +1143,14 @@ Regole:
                 {Object.keys(CAT_PRICE_LABELS).map(c=><option key={c} value={c}>{CAT_PRICE_LABELS[c]}</option>)}
               </select>
             </div>
-            <div><label style={S.lbl}>IVA</label>
-              <select style={{...S.inp,width:"100%"}} value={iva} onChange={e=>setIva(e.target.value)}>
-                <option value="A">A — 4%</option><option value="B">B — 5%</option><option value="C">C — 10%</option><option value="D">D — 22%</option>
+            <div>
+              <label style={{...S.lbl,display:"flex",alignItems:"center",gap:5}}>
+                IVA
+                {ivaAuto&&<span style={{fontSize:9,fontWeight:700,background:"rgba(46,160,67,.18)",color:"#2ea043",borderRadius:4,padding:"1px 5px",letterSpacing:"0.04em"}}>AUTO</span>}
+              </label>
+              <select style={{...S.inp,width:"100%",...(ivaAuto?{borderColor:"rgba(46,160,67,.5)"}:{})}} value={iva}
+                onChange={e=>{ setIva(e.target.value); setIvaAuto(false); }}>
+                {Object.keys(prices.ivaAliquote).map(i=><option key={i} value={i}>{i} — {prices.ivaAliquote[i]}%</option>)}
               </select>
             </div>
           </div>
