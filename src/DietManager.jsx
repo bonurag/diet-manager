@@ -145,7 +145,12 @@ export default function App() {
       const b64 = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result.split(",")[1]); r.onerror=rej; r.readAsDataURL(file); });
       setLmsg("Analisi AI in corso — può richiedere 30-60 secondi...");
       const resp = await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST", headers:{"Content-Type":"application/json"},
+        method:"POST", headers:{
+          "Content-Type":"application/json",
+          "x-api-key": import.meta.env.VITE_ANTHROPIC_KEY,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
         body:JSON.stringify({ model:MODEL, max_tokens:8000,
           messages:[{role:"user",content:[
             {type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},
