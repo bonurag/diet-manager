@@ -12,7 +12,10 @@ const ACTS = {
   repetitions: { c:"#fb923c", bg:"rgba(251,146,60,.13)",  label:"Ripetute" },
   bike:        { c:"#4ade80", bg:"rgba(74,222,128,.12)",  label:"Lungo BDC" },
   run:         { c:"#f87171", bg:"rgba(248,113,113,.12)", label:"Lungo RUN" },
+  weights:     { c:"#fbbf24", bg:"rgba(251,191,36,.12)",  label:"Palestra/Pesi" },
+  other:       { c:"#6b7280", bg:"rgba(107,114,128,.11)", label:"Altro" },
 };
+const getAct = t => ACTS[t] || ACTS.other;
 const DOW_ACT = {0:"run",1:"tabata",2:"endurance",3:"rest",4:"repetitions",5:"tabata",6:"bike"};
 
 const dk = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
@@ -52,8 +55,7 @@ function dietToMarkdown(d) {
   (d.days||[]).forEach(day => {
     md += `## Giorno ${day.n} — ${AL[day.activityType]||day.activity||""} | ${day.kcal} kcal\n`;
     md += `P ${day.macros?.prot}g · C ${day.macros?.carb}g · G ${day.macros?.fat}g`;
-    if(day.condiments?.olioG) md += ` | Olio ${day.condiments.olioG}g`;
-    if(day.condiments?.parmG) md += ` | Parm. ${day.condiments.parmG}g`;
+    if(day.condiments) Object.entries(day.condiments).filter(([,g])=>g>0).forEach(([name,g])=>{ md += ` | ${name} ${g}g`; });
     md += `\n\n`;
     (day.meals||[]).forEach(meal => {
       md += `### ${meal.icon||""} ${meal.name}\n| Alimento | Qtà | Kcal |\n|---|---|---|\n`;
@@ -184,10 +186,18 @@ export default function App() {
         body:JSON.stringify({ model:MODEL, max_tokens:8000,
           messages:[{role:"user",content:[
             {type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},
-            {type:"text",text:`Analizza questo piano alimentare PDF. Restituisci SOLO JSON valido, nessun testo extra, nessun markdown.
-Struttura esatta:
-{"patient":{"name":"","weight":0,"targetWeight":0,"bmi":0,"bmr":0,"fat":0,"ffm":0},"period":{"startDate":"YYYY-MM-DD","checkupDate":"YYYY-MM-DD","checkupTime":"HH:MM"},"avgKcal":0,"macros":{"protein":0,"carbs":0,"fats":0},"days":[{"n":1,"activity":"","activityType":"tabata","kcal":0,"macros":{"prot":0,"carb":0,"fat":0},"meals":[{"name":"Colazione","icon":"☀️","foods":[{"name":"","qty":"","kcal":0,"isSupplement":false}]}],"condiments":{"olioG":0,"parmG":0},"supplements":[]}]}
-Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/barrette sportive; activityType: tabata=TABATA/cyclette, endurance=corsa endurance, rest=riposo, repetitions=ripetute, bike=bici/BDC, run=lungo run. Solo JSON.`}
+            {type:"text",text:`Analizza questo piano alimentare PDF ed estrai i dati nel formato JSON seguente. Usa null per i valori assenti. Non inventare numeri. Restituisci SOLO JSON valido, nessun testo aggiuntivo.
+
+{"patient":{"name":null,"weight":null,"targetWeight":null,"height":null,"bmi":null,"bmr":null,"fat":null,"ffm":null},"period":{"startDate":null,"checkupDate":null,"checkupTime":null},"avgKcal":null,"macros":{"protein":null,"carbs":null,"fats":null},"days":[{"n":1,"activity":"descrizione attività","activityType":"rest","kcal":null,"macros":{"prot":null,"carb":null,"fat":null},"meals":[{"name":"Colazione","icon":"☀️","foods":[{"name":"alimento","qty":"150g","kcal":null,"isSupplement":false}]}],"condiments":{},"supplements":[]}]}
+
+Regole:
+- Estrai TUTTI i giorni presenti nel PDF
+- activityType: rest=riposo/giorno libero, tabata=HIIT/tabata/cyclette alta intensità, endurance=corsa lenta o lunga distanza, repetitions=ripetute velocità, bike=ciclismo/bici da corsa, run=corsa lunga, weights=palestra/pesi/resistance training, other=qualsiasi altro sport o attività non classificabile
+- icon pasto: ☀️=colazione, 🥗=pranzo, 🍽️=cena, 🍎=spuntino mattutino, 🌙=spuntino serale, ⚡=pre o post allenamento
+- isSupplement=true per: proteine whey, creatina, gel energetici, barrette sportive, BCAA, aminoacidi, multivitaminici, integratori sportivi
+- condiments: oggetto nome→grammi SOLO per condimenti con dose giornaliera esplicita (es. {"Olio EVO":10,"Parmigiano":5}); {} se assenti
+- supplements: array di nomi integratori del giorno (non alimenti normali)
+- Tutti i campi numerici devono essere numeri o null, mai stringhe vuote`}
           ]}]
         })
       });
@@ -256,16 +266,13 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
             if(!items[k]) items[k]={name:f.name,qty:f.qty,kcal:f.kcal||0,isSup:!!f.isSupplement,count:0};
             items[k].count++;
           }));
-          if(day.condiments?.olioG){
-            if(!items["__olio"]) items["__olio"]={name:"Olio EVO",qty:"",kcal:0,isSup:false,count:0,totalG:0};
-            items["__olio"].totalG=(items["__olio"].totalG||0)+day.condiments.olioG;
-            items["__olio"].qty=items["__olio"].totalG+"g tot."; items["__olio"].count++;
-          }
-          if(day.condiments?.parmG){
-            if(!items["__parm"]) items["__parm"]={name:"Parmigiano grattugiato",qty:"",kcal:0,isSup:false,count:0,totalG:0};
-            items["__parm"].totalG=(items["__parm"].totalG||0)+day.condiments.parmG;
-            items["__parm"].qty=items["__parm"].totalG+"g tot."; items["__parm"].count++;
-          }
+          if(day.condiments) Object.entries(day.condiments).forEach(([name,g])=>{
+            if(!g||typeof g!=="number") return;
+            const k="__cond_"+name.toLowerCase().replace(/[^a-z0-9]/g,"_");
+            if(!items[k]) items[k]={name,qty:"",kcal:0,isSup:false,count:0,totalG:0};
+            items[k].totalG=(items[k].totalG||0)+g;
+            items[k].qty=items[k].totalG+"g tot."; items[k].count++;
+          });
         }
       }
       cur.setDate(cur.getDate()+1);
@@ -399,7 +406,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
         <div style={{...S.card,...S.cardP}}>
           <div style={S.cardT}>Giorni del Piano ({diet.days?.length})</div>
           <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-            {diet.days?.map(d=>{ const a=ACTS[d.activityType]||ACTS.rest; return (
+            {diet.days?.map(d=>{ const a=getAct(d.activityType); return (
               <div key={d.n} onClick={()=>setView("meals")} style={{background:a.bg,border:`1px solid ${a.c}44`,borderRadius:6,padding:"5px 8px",fontSize:11,cursor:"pointer",transition:"opacity .15s"}}>
                 <div style={{fontWeight:700,color:a.c}}>G.{d.n}</div>
                 <div style={{color:"#6e7681",fontSize:9}}>{d.activity?.substring(0,14)}</div>
@@ -437,7 +444,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
           {/* Assign buttons */}
           <div style={{display:"flex",gap:3,flexWrap:"wrap",marginBottom:10}}>
             <span style={{...S.muted,fontSize:10,alignSelf:"center"}}>Assegna manualmente:</span>
-            {diet?.days?.map(d=>{ const a=ACTS[d.activityType]||ACTS.rest; return (
+            {diet?.days?.map(d=>{ const a=getAct(d.activityType); return (
               <button key={d.n} onClick={()=>setManDay(manDay===d.n?null:d.n)} style={{background:manDay===d.n?a.c:a.bg,border:`1px solid ${a.c}66`,borderRadius:4,padding:"2px 7px",fontSize:10,fontWeight:700,color:manDay===d.n?"#0d1117":a.c,cursor:"pointer"}}>G.{d.n}</button>
             );})}
             <button style={{...S.btnG,fontSize:10,padding:"2px 7px",marginLeft:"auto",color:"#f85149",borderColor:"rgba(248,81,73,.3)"}} onClick={()=>setCal({})}>🗑</button>
@@ -449,7 +456,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
             {Array(lastD).fill(null).map((_,i)=>{
               const date=new Date(y,m,i+1), dKey=dk(date);
               const gn=cal[dKey], dayD=gn?diet?.days?.find(x=>x.n===gn):null;
-              const a=dayD?(ACTS[dayD.activityType]||ACTS.rest):null;
+              const a=dayD?(getAct(dayD.activityType)):null;
               const isT=dKey===todayDk, isS=dKey===selDk;
               const isCtrl=planE&&dKey===planE;
               return <div key={i} onClick={()=>{ setSelDt(date); if(manDay!==null){setCal(p=>({...p,[dKey]:manDay}));setManDay(null);} }}
@@ -499,7 +506,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
   const MealsV = () => {
     const [ld,setLd]=useState(dk(selDt));
     const date=pd(ld), day=dayFor(date);
-    const act=day?(ACTS[day.activityType]||ACTS.rest):null;
+    const act=day?(getAct(day.activityType)):null;
     return (
       <div>
         <div style={{...S.card,...S.cardP}}>
@@ -531,11 +538,12 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
             ))}
           </div>;
         })}
-        {day?.condiments&&(day.condiments.olioG>0||day.condiments.parmG>0)&&(
+        {day?.condiments&&Object.keys(day.condiments).length>0&&(
           <div style={S.mc}>
             <div style={S.mh}><div style={{fontWeight:700,fontSize:12}}>🫙 Condimenti</div></div>
-            {day.condiments.olioG>0&&<div style={S.fi}><div>Olio EVO</div><div style={{color:"#d29922",fontWeight:600,fontSize:11}}>{day.condiments.olioG}g</div><div style={{...S.muted,fontSize:10}}>{(day.condiments.olioG*9).toFixed(0)} kc</div></div>}
-            {day.condiments.parmG>0&&<div style={S.fi}><div>Parmigiano grattugiato</div><div style={{color:"#d29922",fontWeight:600,fontSize:11}}>{day.condiments.parmG}g</div><div style={{...S.muted,fontSize:10}}>{(day.condiments.parmG*3.92).toFixed(0)} kc</div></div>}
+            {Object.entries(day.condiments).filter(([,g])=>g>0).map(([name,g])=>(
+              <div key={name} style={S.fi}><div>{name}</div><div style={{color:"#d29922",fontWeight:600,fontSize:11}}>{g}g</div><div/></div>
+            ))}
           </div>
         )}
         {day?.macros&&<div style={{...S.card,...S.cardP}}>
@@ -586,7 +594,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
     const DayPill = ({date}) => {
       const dKey=dk(date);
       const day=dayFor(date);
-      const act=day?(ACTS[day.activityType]||ACTS.rest):null;
+      const act=day?(getAct(day.activityType)):null;
       const isEx=!!excl[dKey];
       const dow=["D","L","M","M","G","V","S"][date.getDay()];
       return (
@@ -796,7 +804,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
           <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
             {weekDays.map(d=>{ const day=dayFor(d); const supps=day?.meals?.flatMap(m=>m.foods?.filter(f=>f.isSupplement)||[])||[]; const isT=dk(d)===dk(today); return (
               <div key={dk(d)} style={{flex:1,minWidth:75,background:isT?"rgba(210,153,34,.07)":"#161b22",border:`1px solid ${isT?"#d29922":"#21262d"}`,borderRadius:6,padding:"6px 7px"}}>
-                <div style={{fontSize:10,fontWeight:700,color:isT?"#d29922":"#6e7681",marginBottom:3}}>{["Dom","Lun","Mar","Mer","Gio","Ven","Sab"][d.getDay()]} {d.getDate()}{day&&<span style={{color:ACTS[day.activityType]?.c||"#6e7681",marginLeft:2,fontSize:8}}>G.{day.n}</span>}</div>
+                <div style={{fontSize:10,fontWeight:700,color:isT?"#d29922":"#6e7681",marginBottom:3}}>{["Dom","Lun","Mar","Mer","Gio","Ven","Sab"][d.getDay()]} {d.getDate()}{day&&<span style={{color:getAct(day.activityType).c,marginLeft:2,fontSize:8}}>G.{day.n}</span>}</div>
                 {supps.length===0?<div style={{fontSize:9,color:"#6e7681"}}>—</div>:supps.map(s=><div key={s.name} style={{fontSize:9,color:"#58a6ff",marginBottom:1,lineHeight:1.3}}>{s.name.substring(0,16)}<br/><span style={{color:"#d29922"}}>{s.qty}</span></div>)}
               </div>
             );})}
