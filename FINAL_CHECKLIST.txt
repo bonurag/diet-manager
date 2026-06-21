@@ -1,0 +1,122 @@
+✅ TUTTI I FILE PRONTI — Scarica da /mnt/user-data/outputs/
+
+═══════════════════════════════════════════════════════════════════
+
+📦 FILE ESSENZIALI (da scaricare)
+═══════════════════════════════════════════════════════════════════
+
+ROOT FOLDER (diet-manager/):
+✅ DietManager.jsx          → src/DietManager.jsx
+✅ main.jsx                 → src/main.jsx
+✅ index.html               → index.html
+✅ package.json             → package.json
+✅ vite.config.js           → vite.config.js
+✅ .env.example             → .env.example
+✅ .gitignore               → .gitignore
+✅ README.md                → README.md
+
+DOCS FOLDER (docs/):
+✅ SETUP_LOCALE.md          → docs/SETUP_LOCALE.md
+✅ CONTRIBUIRE.md           → docs/CONTRIBUIRE.md
+✅ SCHEMA_PREZZI.md         → docs/SCHEMA_PREZZI.md
+
+DATA FOLDER (data/):
+✅ prezzario_conad.json     → data/prezzario_conad.json
+✅ prezzario_multi_negozi.json → data/prezzario_multi_negozi.json
+
+═══════════════════════════════════════════════════════════════════
+
+📋 ISTRUZIONI RAPIDE
+═══════════════════════════════════════════════════════════════════
+
+1. SCARICA TUTTI I FILE DA /mnt/user-data/outputs/
+
+2. CREA STRUTTURA CARTELLE:
+   
+   mkdir diet-manager
+   cd diet-manager
+   mkdir src docs data public
+
+3. COPIA I FILE NEI POSTI GIUSTI:
+
+   NELLA ROOT (diet-manager/):
+   - index.html
+   - package.json
+   - vite.config.js
+   - .env.example
+   - .gitignore
+   - README.md
+
+   IN src/:
+   - main.jsx (scaricato come "main.jsx")
+   - DietManager.jsx
+
+   IN docs/:
+   - SETUP_LOCALE.md
+   - CONTRIBUIRE.md
+   - SCHEMA_PREZZI.md
+
+   IN data/:
+   - prezzario_conad.json
+   - prezzario_multi_negozi.json
+
+4. SETUP LOCALE:
+
+   npm install
+   cp .env.example .env
+   # Apri .env e inserisci: VITE_ANTHROPIC_KEY=sk-ant-api03-xxxxx
+   npm run dev
+   # Apri http://localhost:5173
+
+5. PUSH SU GITHUB:
+
+   git init
+   git add .
+   git commit -m "Initial commit: Diet Manager"
+   git remote add origin https://github.com/TUO_USERNAME/diet-manager.git
+   git push -u origin main
+
+═══════════════════════════════════════════════════════════════════
+
+✨ STRUTTURA FINALE ATTESA:
+
+diet-manager/
+├── .env.example
+├── .gitignore
+├── README.md
+├── index.html
+├── package.json
+├── vite.config.js
+├── src/
+│   ├── main.jsx
+│   └── DietManager.jsx
+├── docs/
+│   ├── SETUP_LOCALE.md
+│   ├── CONTRIBUIRE.md
+│   └── SCHEMA_PREZZI.md
+├── data/
+│   ├── prezzario_conad.json
+│   └── prezzario_multi_negozi.json
+└── public/
+    (vuoto)
+
+═══════════════════════════════════════════════════════════════════
+
+📍 FILE MANCANTI? NO — TUTTI DISPONIBILI!
+
+Se non vedi un file, prova:
+- Fare refresh della pagina
+- Controllare che inizi con il nome esatto (maiuscole/minuscole)
+- Cliccare direttamente dal nome nella lista sopra
+
+═══════════════════════════════════════════════════════════════════
+
+🎯 PROSSIMO STEP:
+
+Una volta online su GitHub, aggiungerò automaticamente 
+l'integrazione dei prezzi nel Diet Manager (tab ⏷ Prezzi con 
+calcolo costo settimanale multi-negozio).
+
+═══════════════════════════════════════════════════════════════════
+
+🚀 PRONTO? Scarica tutti i file e organizzali come sopra!

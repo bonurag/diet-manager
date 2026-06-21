@@ -1,0 +1,149 @@
+{
+  "versione": "2.0",
+  "dataAggiornamento": "2026-05-31",
+  "negozi": [
+    {
+      "id": "conad",
+      "nome": "Conad",
+      "localita": "Palermo (es.)",
+      "contatti": "Via Libertà, Palermo",
+      "note": "Catena principale, spesso ha promozioni"
+    },
+    {
+      "id": "coop",
+      "nome": "Coop",
+      "localita": "Palermo (es.)",
+      "contatti": "",
+      "note": "Da aggiungere con scontrini futuri"
+    },
+    {
+      "id": "lidl",
+      "nome": "Lidl",
+      "localita": "Palermo (es.)",
+      "contatti": "",
+      "note": "Da aggiungere con scontrini futuri"
+    }
+  ],
+  "ivaAliquote": {
+    "A": 4.0,
+    "B": 5.0,
+    "C": 10.0,
+    "D": 22.0
+  },
+  "categorie": {
+    "frutta_verdura": {
+      "label": "🥦 Frutta e Verdura",
+      "ordine": 1
+    },
+    "carne_pesce": {
+      "label": "🥩 Carne e Pesce",
+      "ordine": 2
+    },
+    "latticini": {
+      "label": "🥛 Latticini/Uova/Formaggi",
+      "ordine": 3
+    },
+    "cereali_pane": {
+      "label": "🌾 Cereali/Pane/Riso",
+      "ordine": 4
+    },
+    "legumi_conserve": {
+      "label": "🫘 Legumi e Conserve",
+      "ordine": 5
+    },
+    "condimenti": {
+      "label": "🫙 Condimenti",
+      "ordine": 6
+    },
+    "frutta_secca": {
+      "label": "🥜 Frutta Secca",
+      "ordine": 7
+    },
+    "bevande": {
+      "label": "🥤 Bevande",
+      "ordine": 8
+    },
+    "non_alimentare": {
+      "label": "🧹 Non Alimentare",
+      "ordine": 9
+    },
+    "altro": {
+      "label": "🍫 Altro",
+      "ordine": 10
+    }
+  },
+  "prodotti": [
+    {
+      "id": "zucchine",
+      "descrizione": "ZUCCHINE SCURE",
+      "nomePiano": "Zucchine",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.36,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Media tra 2 acquisti (2.41 + 2.31)",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "carote",
+      "descrizione": "CAROTE",
+      "nomePiano": "Carote",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.11,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Variazione forte tra acquisti (1.53 vs 0.68) — peso diverso",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "mozzarella_proteica",
+      "descrizione": "MOZZARELLA PROTEICA",
+      "nomePiano": "Mozzarella proteica (Granarolo Benessere)",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.39,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Prezzo stabile in entrambi gli scontrini",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "philadelphia_protein",
+      "descrizione": "PHILADELPHIA PROTEIN",
+      "nomePiano": "Philadelphia Protein",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 3.58,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Netto dopo sconto -0.72€ (4.30-0.72=3.58)",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    }
+  ]
+}
