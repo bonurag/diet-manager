@@ -1,6 +1,31 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import DEFAULT_PRICES from "../data/prezzario_conad.json";
 
+// Tauri filesystem helpers — no-op gracefully in browser mode
+const isTauri = () => typeof window !== "undefined" && !!window.__TAURI_INTERNALS__;
+
+async function tauriReadMd(filename) {
+  if (!isTauri()) return null;
+  try {
+    const { readTextFile, BaseDirectory } = await import("@tauri-apps/plugin-fs");
+    const { appLocalDataDir } = await import("@tauri-apps/api/path");
+    const dir = await appLocalDataDir();
+    const text = await readTextFile(dir + filename);
+    return text;
+  } catch { return null; }
+}
+
+async function tauriWriteMd(filename, content) {
+  if (!isTauri()) return false;
+  try {
+    const { writeTextFile } = await import("@tauri-apps/plugin-fs");
+    const { appLocalDataDir } = await import("@tauri-apps/api/path");
+    const dir = await appLocalDataDir();
+    await writeTextFile(dir + filename, content);
+    return true;
+  } catch { return false; }
+}
+
 const MODEL = "claude-sonnet-4-20250514";
 const MI = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
 const DI = ["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
@@ -149,9 +174,22 @@ export default function App() {
   const toggleExcl = k => setExcl(p=>{ const n={...p}; n[k]?delete n[k]:n[k]=true; return n; });
   const exclInRange = (from,to) => { const cur=new Date(from),res=[]; while(cur<=to){const d=dk(cur);if(excl[d])res.push(d);cur.setDate(cur.getDate()+1);} return res; };
 
-  // Load persisted data
+  // Load persisted data — Tauri: try .md from disk first; browser: localStorage
   useEffect(() => {
     (async () => {
+      // Try to auto-load diet from disk (.md) when running in Tauri
+      const mdKey = await store.get("dm-diet-md-filename");
+      if (mdKey) {
+        const mdText = await tauriReadMd(mdKey);
+        if (mdText) {
+          try {
+            const parsed = markdownToDiet(mdText);
+            setDiet(parsed);
+            if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
+            if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
+          } catch { /* fallback to JSON below */ }
+        }
+      }
       const d  = await store.get("dm-diet");  if(d)  setDiet(d);
       const c  = await store.get("dm-cal");   if(c)  setCal(c);
       const w  = await store.get("dm-wts");   if(w)  setWts(w);
@@ -207,7 +245,11 @@ Regole:
       const clean = txt.replace(/```json\n?/g,"").replace(/```\n?/g,"").trim();
       const parsed = JSON.parse(clean);
       setDiet(parsed);
-      store.set("dm-diet-md", dietToMarkdown(parsed));
+      const md = dietToMarkdown(parsed);
+      const mdFilename = `piano_${(parsed.patient?.name||"dieta").replace(/\s+/g,"_").toLowerCase()}.md`;
+      store.set("dm-diet-md", md);
+      store.set("dm-diet-md-filename", mdFilename);
+      tauriWriteMd(mdFilename, md);
       if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
       if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
       setLmsg("✓ Piano caricato!");
@@ -224,8 +266,11 @@ Regole:
     try {
       const text = await file.text();
       const parsed = markdownToDiet(text);
+      const mdFilename = `piano_${(parsed.patient?.name||"dieta").replace(/\s+/g,"_").toLowerCase()}.md`;
       setDiet(parsed);
       store.set("dm-diet-md", text);
+      store.set("dm-diet-md-filename", mdFilename);
+      tauriWriteMd(mdFilename, text);
       if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
       if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
       setLmsg("✓ Piano caricato dal Markdown!");
