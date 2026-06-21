@@ -192,7 +192,22 @@ export default function App() {
           } catch { /* fallback sotto */ }
         }
       }
-      // 2. Fallback JSON localStorage
+      // 2. Prova a caricare da /piano.md nella cartella public/ (browser dev)
+      if (!dietLoaded) {
+        try {
+          const r = await fetch("/piano.md", { cache: "no-store" });
+          if (r.ok) {
+            const text = await r.text();
+            const parsed = markdownToDiet(text);
+            setDiet(parsed);
+            if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
+            if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
+            store.set("dm-diet-md", text);
+            dietLoaded = true;
+          }
+        } catch { /* non presente, continua */ }
+      }
+      // 3. Fallback JSON localStorage
       if (!dietLoaded) {
         const d = await store.get("dm-diet"); if(d) setDiet(d);
       }
