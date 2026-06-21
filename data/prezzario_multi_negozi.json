@@ -25,10 +25,10 @@
     }
   ],
   "ivaAliquote": {
-    "A": 4.0,
-    "B": 5.0,
-    "C": 10.0,
-    "D": 22.0
+    "A": 4,
+    "B": 5,
+    "C": 10,
+    "D": 22
   },
   "categorie": {
     "frutta_verdura": {
@@ -86,7 +86,7 @@
           "prezzo": 2.36,
           "iva": "A",
           "data": "2026-05-31",
-          "note": "Media tra 2 acquisti (2.41 + 2.31)",
+          "note": "Prezzo variabile in base al peso pesato in cassa. Media tra 2 acquisti.",
           "scontrino": "DOC.0263-0005"
         }
       }
@@ -104,7 +104,313 @@
           "prezzo": 1.11,
           "iva": "A",
           "data": "2026-05-31",
-          "note": "Variazione forte tra acquisti (1.53 vs 0.68) — peso diverso",
+          "note": "Prezzo variabile in base al peso. Forte variazione tra i 2 acquisti (peso diverso).",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "pomodori",
+      "descrizione": "POMODORO GRAPPOLO",
+      "nomePiano": "Pomodori freschi",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.11,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Pomodoro a grappolo",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "mele",
+      "descrizione": "MELE GRANNY 75-80",
+      "nomePiano": "Mele",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.99,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Varietà Granny Smith calibro 75-80",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "pesche",
+      "descrizione": "PESCHE NOCI",
+      "nomePiano": "Pesche",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 3.74,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Pesche noci",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "kiwi",
+      "descrizione": "KIWI ESTERI / HAYWARD",
+      "nomePiano": "Kiwi",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.51,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Forte variazione: probabilmente quantità diverse acquistate",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "albicocche",
+      "descrizione": "ALBICOCCHE",
+      "nomePiano": "Albicocche",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "prugne",
+      "descrizione": "SUSINE ROSSE",
+      "nomePiano": "Prugne / susine",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.21,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "banana",
+      "descrizione": "BANANE CPQ",
+      "nomePiano": "Banane",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.1,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "cpq = confezione pre-pesata",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "patate",
+      "descrizione": "PATATE",
+      "nomePiano": "Patate",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.09,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "rucola",
+      "descrizione": "RUCOLA cpq 70-125gr",
+      "nomePiano": "Rucola",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 0.89,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Formato 70gr a 0.89€, formato 125gr a 1.39€. Prezzo di riferimento: 70gr.",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "lattuga_iceberg",
+      "descrizione": "ICEBERG JULIENNE 500",
+      "nomePiano": "Lattuga iceberg",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.49,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Busta 500g già tagliata julienne",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "valerianella",
+      "descrizione": "VALERIANA cpq 125gr",
+      "nomePiano": "Valerianella",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.49,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Confezione 125g",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "spinaci",
+      "descrizione": "SPINACI SOFFICI / FOGLIA VERDE",
+      "nomePiano": "Spinaci al vapore",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.99,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Surgelati, busta singola",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "fagiolini",
+      "descrizione": "FAGIOLINI E PATATE B",
+      "nomePiano": "Fagiolini",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.39,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Prezzo netto dopo sconto -0.80 (2.19-0.80=1.39). Surgelati misti fagiolini+patate.",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "noci",
+      "descrizione": "NOCI SGUSC.CONAD CAL",
+      "nomePiano": "Noci",
+      "categoria": "frutta_secca",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 5.25,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Formato grande, calibrate, sgusciate",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "actimel",
+      "descrizione": "ACTIMEL IMMUNO PLUS / ACTIMEL+ FRAGOLA",
+      "nomePiano": "Yogurt con fermenti (Actimel)",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 3.59,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Confezione multipack (8 flaconcini circa)",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "fiocchi_latte",
+      "descrizione": "FIOCCHI DI LATTE PIA",
+      "nomePiano": "Fiocchi di latte",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.35,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Prezzo netto con promo 2x1 (pagato 1 su 2 acquistati)",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "yogurt_total0",
+      "descrizione": "YOG.TOT 0% BIANCO",
+      "nomePiano": "Yogurt scremato bianco / Yogurt greco scr. bianco",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.72,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Formato grande 3.89€, formato singolo 1.55€",
           "scontrino": "DOC.0263-0005"
         }
       }
@@ -122,7 +428,43 @@
           "prezzo": 1.39,
           "iva": "A",
           "data": "2026-05-31",
-          "note": "Prezzo stabile in entrambi gli scontrini",
+          "note": "Prezzo costante in entrambi gli scontrini",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "philadelphia_yog",
+      "descrizione": "PHILADELPHIA C/YOGURT",
+      "nomePiano": "Philadelphia (variante)",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.79,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Prezzo netto dopo sconto -0.30",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "philadelphia_no_lattosio",
+      "descrizione": "PHILADELPHIA SENZA LATTOSIO",
+      "nomePiano": "Philadelphia (variante senza lattosio)",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.79,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Prezzo netto dopo sconto -0.56",
           "scontrino": "DOC.0263-0005"
         }
       }
@@ -140,7 +482,1177 @@
           "prezzo": 3.58,
           "iva": "A",
           "data": "2026-05-31",
-          "note": "Netto dopo sconto -0.72€ (4.30-0.72=3.58)",
+          "note": "MATCH ESATTO col piano. Prezzo netto dopo sconto -0.72 (4.30-0.72=3.58)",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "latte_ps",
+      "descrizione": "LAT.UHT PS AD C.LR B",
+      "nomePiano": "Latte parzialmente scremato",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.19,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Prezzo costante in entrambi gli scontrini. Probabile formato 1L.",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "ricotta_light",
+      "descrizione": "RICOTTA LIGHT PIACERI",
+      "nomePiano": "Ricotta light",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.29,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Prezzo netto con promo 2x1 (2.58-1.29=1.29)",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "hipro_drink",
+      "descrizione": "HIPRO DRINK VANIGLIA/STRACCIATELLA",
+      "nomePiano": "High Protein Drink (sostituto Ehrmann)",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.74,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Marca Hipro al posto di Ehrmann citato nel piano. Prezzo netto dopo sconto fornitore.",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "hipro_mirtillo",
+      "descrizione": "HIPRO MIRTILLO 160g",
+      "nomePiano": "Dessert proteico (variante mirtillo)",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 0.99,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Prezzo netto dopo sconto -0.50",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "salmone_affumicato",
+      "descrizione": "SALMONE AFF.CONVENIENZA",
+      "nomePiano": "Salmone affumicato",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 6.99,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Prezzo netto dopo sconto -2.70 (9.69-2.70=6.99)",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "hamburger_manzo",
+      "descrizione": "HAMBURGER SCOTTONA S",
+      "nomePiano": "Hamburger di manzo",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 4.4,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Carne di scottona",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "pollo_petto",
+      "descrizione": "PETTO DI POLLO A FETTE",
+      "nomePiano": "Petto di pollo",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 3.15,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Vassoio a fette, banco macelleria",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "salmone_filetti",
+      "descrizione": "SALMONE FETTE NORVEGESE / FILETTO FRESCO",
+      "nomePiano": "Salmone (filetti)",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 3.27,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Filetti freschi norvegesi",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "orata_filetti",
+      "descrizione": "FILETTI DI ORATA EST",
+      "nomePiano": "Orata (filetti)",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 4.69,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "MATCH ESATTO col piano",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "manzo_inglese",
+      "descrizione": "MANZO ALL'INGLESE",
+      "nomePiano": "Manzo magro (fesa/roast beef)",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 3.84,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Roast beef pronto - molto simile al \"manzo magro\" del piano",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "tonno_naturale",
+      "descrizione": "TONNO VERONATURALE M",
+      "nomePiano": "Tonno al naturale",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 5.39,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "MATCH ESATTO col piano. Confezione multipack, prezzo netto dopo sconto -3.30",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "merluzzo_gratin",
+      "descrizione": "FIL.MERL.GRAT.MELANZANE/ERBE",
+      "nomePiano": "Filetti merluzzo gratin patate Findus",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.99,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Varianti diverse da quella citata nel piano (patate+rosmarino) ma stesso tipo di prodotto surgelato. Prezzo netto dopo sconto -3.00 cad.",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "pane_tramezzino",
+      "descrizione": "PANE PER TRAMEZZINO",
+      "nomePiano": "Pane a fette / pane integrale",
+      "categoria": "cereali_pane",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.59,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Non integrale - verificare se necessaria versione integrale",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "pane_forno",
+      "descrizione": "FORNO TRADIZIONALE (pane)",
+      "nomePiano": "Pane integrale fresco / Pane di frumento",
+      "categoria": "cereali_pane",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 0.87,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Banco forno, peso variabile in base al pezzo scelto",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "riso_carnaroli",
+      "descrizione": "RISO CARNAROLI CURTI",
+      "nomePiano": "Riso (generico)",
+      "categoria": "cereali_pane",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 4.79,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Riso Carnaroli premium - più caro del riso standard del piano",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "riso_gallo",
+      "descrizione": "RISO GALLO BLONDXINS",
+      "nomePiano": "Riso integrale (possibile)",
+      "categoria": "cereali_pane",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.89,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Prezzo netto dopo sconto -1.26. Verificare se integrale o bianco.",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "biscotti_saiwa",
+      "descrizione": "BISC.SAIWA ORO 5 CEREALI",
+      "nomePiano": "Biscotti secchi integrali (sostituto)",
+      "categoria": "cereali_pane",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.29,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Non sono biscotti integrali puri - 5 cereali misti",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "ceci_vaso",
+      "descrizione": "CECI VASO VETRO CONAD",
+      "nomePiano": "Ceci in scatola",
+      "categoria": "legumi_conserve",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 0.89,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Prezzo per singolo vaso (1.78 era per 2 pezzi)",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "passata_pomodoro",
+      "descrizione": "PASSATA POM.BIO VERS",
+      "nomePiano": "Pomodori (passata)",
+      "categoria": "legumi_conserve",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Prezzo netto dopo sconto -0.45",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "pelati",
+      "descrizione": "PELATI CIRIO",
+      "nomePiano": "Pomodori pelati",
+      "categoria": "legumi_conserve",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 0.99,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "Prezzo netto dopo sconto -0.30",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "ragu_carne",
+      "descrizione": "RAGU STAR CARNE LATTE",
+      "nomePiano": "Ragù di carne fresco",
+      "categoria": "legumi_conserve",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.23,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Ragù pronto in vasetto, non fresco da banco come nel piano. Prezzo netto dopo sconto -0.76",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "olive_verdi",
+      "descrizione": "OLIVE VERDI DEN.CONAD",
+      "nomePiano": "Olive verdi",
+      "categoria": "condimenti",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.59,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Prezzo per singolo vasetto (4.77 era per 3 pezzi)",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "miele",
+      "descrizione": "MIELE AMBROSOLI MILLEFIORI",
+      "nomePiano": "Miele",
+      "categoria": "condimenti",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 3.85,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "ketchup",
+      "descrizione": "KETCHUP MULTIPACK CONAD",
+      "nomePiano": "Salsa ketchup",
+      "categoria": "condimenti",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 0.99,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "cioccolato_85",
+      "descrizione": "TAV.EXCELL.85%CACAO",
+      "nomePiano": "Cioccolato fondente 80% (variante 85%)",
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 3.29,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "85% invece di 80% indicato nel piano. Prezzo netto dopo sconto -0.40",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "cioccolato_78",
+      "descrizione": "TAV.EXCELL.78%CACAO",
+      "nomePiano": "Cioccolato fondente 80% (variante 78%)",
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 3.29,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "78% invece di 80% indicato nel piano. Prezzo netto per singola tavoletta dopo sconto (7.38-0.80)/2",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "succo_arancia",
+      "descrizione": "SUCCO S/ZUC.AGG.ARANCIA",
+      "nomePiano": "Succo arancia rossa 100%",
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.89,
+          "iva": "D",
+          "data": "2026-05-31",
+          "note": "Senza zuccheri aggiunti - molto simile alla richiesta del piano",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "pizza_verdure",
+      "descrizione": "PIZZA LASAPORITA VERDURE",
+      "nomePiano": "Pizza vegetariana surgelata",
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": true,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.69,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "MATCH ESATTO col piano",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "frulla_mela",
+      "descrizione": "FRULLA' BIO MELA DOY",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 0.98,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "ciliegie",
+      "descrizione": "CILIEGIA ITA CPQ 2",
+      "nomePiano": null,
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.49,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "ananas",
+      "descrizione": "ANANAS",
+      "nomePiano": null,
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.77,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "cetrioli",
+      "descrizione": "CETRIOLI",
+      "nomePiano": null,
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 0.54,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "semi_chia",
+      "descrizione": "SEMI DI CHIA NERA",
+      "nomePiano": null,
+      "categoria": "condimenti",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.69,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "prosciutto_cotto",
+      "descrizione": "PROSC.COTTO A.Q.F&C",
+      "nomePiano": null,
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.79,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "piadina_olio",
+      "descrizione": "PIADINA FRESCA OLIO",
+      "nomePiano": null,
+      "categoria": "cereali_pane",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.99,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "mortadella",
+      "descrizione": "MORTADELLA IGP FIRMA",
+      "nomePiano": null,
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.72,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "netto dopo sconto -2.26",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "pasta_brisee",
+      "descrizione": "PASTA BRISEE CONAD",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.15,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "pasta_pizza",
+      "descrizione": "PASTA PER PIZZA",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.49,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "pasta_sfoglia_rett",
+      "descrizione": "PASTA SFOGLIA RETTANGOLARE",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.15,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "pasta_sfoglia_rot",
+      "descrizione": "PASTA SFOGLIA ROTONDA",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.15,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "fioc_fond",
+      "descrizione": "FIOC.FR.INT.FOND.PIA",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.59,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "cavallo_sfilacci",
+      "descrizione": "CAVALLO SFILACCI X1",
+      "nomePiano": null,
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 4.8,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "mozzarella_grande",
+      "descrizione": "MOZZARELLA P",
+      "nomePiano": null,
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 3.19,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "mayo",
+      "descrizione": "MAYO TD HEINZ 395g",
+      "nomePiano": null,
+      "categoria": "condimenti",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.99,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "netto dopo sconto -1.20",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "patatine",
+      "descrizione": "PATATINE CLASSICHE S",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 4.19,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "cetrioli_sacla",
+      "descrizione": "CETRIOLI SACLA 290g",
+      "nomePiano": null,
+      "categoria": "condimenti",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.79,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "cipolline_aceto",
+      "descrizione": "CIPOLLINE ACETO CONAD",
+      "nomePiano": null,
+      "categoria": "condimenti",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 0.99,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "pomodori_secchi",
+      "descrizione": "POMODORI SECCHI OLIO",
+      "nomePiano": null,
+      "categoria": "condimenti",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.39,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "taralli",
+      "descrizione": "TARALLI FINOCCHIO",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.59,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "estathe_limone",
+      "descrizione": "ESTATHE BOTT.LIMONE/PET",
+      "nomePiano": null,
+      "categoria": "bevande",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.69,
+          "iva": "D",
+          "data": "2026-05-31",
+          "note": "netto dopo sconti",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "coca_cola",
+      "descrizione": "COCA COLA REGULAR/ZERO",
+      "nomePiano": null,
+      "categoria": "bevande",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.29,
+          "iva": "D",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "taccole",
+      "descrizione": "TACCOLE BONDUELLE",
+      "nomePiano": null,
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.89,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "edamer",
+      "descrizione": "EDAMER A FETTE BAYER",
+      "nomePiano": null,
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.15,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "fatina_mandorle",
+      "descrizione": "FATINA MAND.TOST.NO",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.79,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "frulla_mela_fragola",
+      "descrizione": "FRULLA'BIO MELA-FRAGOLA",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 0.98,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "yog_vipiteno",
+      "descrizione": "YOG.VIPITENO MAGRO",
+      "nomePiano": null,
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 0.89,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "mozzarella_no_lattosio",
+      "descrizione": "MOZZARELLA SENZA LATTOSIO",
+      "nomePiano": null,
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.19,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "netto dopo sconto -0.26",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "nutella",
+      "descrizione": "NUTELLA COPPETTA X6",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.69,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "piadina_snack",
+      "descrizione": "PIADINA SNACK CLASSICA",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.59,
+          "iva": "A",
+          "data": "2026-05-31",
+          "note": "netto dopo sconto -0.70",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "candeggina",
+      "descrizione": "CAND CONAD PROFUMATA",
+      "nomePiano": null,
+      "categoria": "non_alimentare",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.69,
+          "iva": "D",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "sale_lavastoviglie",
+      "descrizione": "SALE PER LAVASTOVIGLIE",
+      "nomePiano": null,
+      "categoria": "non_alimentare",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 1.39,
+          "iva": "D",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "pizza_prosciutto",
+      "descrizione": "PIZZA LASAPORITA PROSCIUTTO",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.69,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "tris_grigliato",
+      "descrizione": "TRIS GRIGLIATO + GUSTO",
+      "nomePiano": null,
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 2.49,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "gnocchetti_sorrentina",
+      "descrizione": "GNOCCHETTI ALLA SORRENTINA",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "unita": "pezzo",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 3.99,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "",
+          "scontrino": "DOC.0263-0005"
+        }
+      }
+    },
+    {
+      "id": "banco_tradizionale",
+      "descrizione": "BANCO TRADIZIONALE (generico)",
+      "nomePiano": null,
+      "categoria": "altro",
+      "tipoPrezzo": "peso_variabile",
+      "unita": "acquisto",
+      "presenteNelPiano": false,
+      "prezzi": {
+        "conad": {
+          "prezzo": 3.45,
+          "iva": "C",
+          "data": "2026-05-31",
+          "note": "Voce generica banco gastronomia/macelleria, non specifica",
           "scontrino": "DOC.0263-0005"
         }
       }

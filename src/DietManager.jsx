@@ -41,6 +41,37 @@ function findPriceFor(prices, foodName){
   return p||null;
 }
 
+function dietToMarkdown(d) {
+  const p = d.patient||{}, per = d.period||{};
+  const AL = {tabata:"TABATA + Cyclette",endurance:"Endurance",rest:"Riposo",repetitions:"Ripetute",bike:"Lungo BDC",run:"Lungo RUN"};
+  let md = `# Piano Alimentare — ${p.name||"Paziente"}\n\n`;
+  md += `**Peso**: ${p.weight}kg → **Obiettivo**: ${p.targetWeight}kg | **BMI**: ${p.bmi} | **BMR**: ${p.bmr} kcal\n`;
+  md += `**Massa grassa**: ${p.fat}% | **FFM**: ${p.ffm}kg\n\n`;
+  md += `**Periodo**: ${per.startDate||"?"} → ${per.checkupDate||"?"} | **Visita**: ${per.checkupDate||"?"} ore ${per.checkupTime||"?"}\n`;
+  md += `**Kcal medie**: ${d.avgKcal} | P: ${d.macros?.protein}g | C: ${d.macros?.carbs}g | G: ${d.macros?.fats}g\n\n---\n\n`;
+  (d.days||[]).forEach(day => {
+    md += `## Giorno ${day.n} — ${AL[day.activityType]||day.activity||""} | ${day.kcal} kcal\n`;
+    md += `P ${day.macros?.prot}g · C ${day.macros?.carb}g · G ${day.macros?.fat}g`;
+    if(day.condiments?.olioG) md += ` | Olio ${day.condiments.olioG}g`;
+    if(day.condiments?.parmG) md += ` | Parm. ${day.condiments.parmG}g`;
+    md += `\n\n`;
+    (day.meals||[]).forEach(meal => {
+      md += `### ${meal.icon||""} ${meal.name}\n| Alimento | Qtà | Kcal |\n|---|---|---|\n`;
+      (meal.foods||[]).forEach(f => { md += `| ${f.isSupplement?"⚡ ":""}${f.name} | ${f.qty} | ${f.kcal} |\n`; });
+      md += `\n`;
+    });
+    if(day.supplements?.length) md += `**Integratori**: ${day.supplements.join(", ")}\n\n`;
+  });
+  md += `---\n\n<!-- diet-json\n${JSON.stringify(d)}\n-->\n`;
+  return md;
+}
+
+function markdownToDiet(text) {
+  const m = text.match(/<!--\s*diet-json\s*\n([\s\S]+?)\n\s*-->/);
+  if(!m) throw new Error("Nessun blocco diet-json trovato nel file .md");
+  return JSON.parse(m[1]);
+}
+
 const CAT_PRICE_LABELS = {
   frutta_verdura:"🥦 Frutta e Verdura", carne_pesce:"🥩 Carne e Pesce",
   latticini:"🥛 Latticini/Uova/Formaggi", cereali_pane:"🌾 Cereali/Pane/Riso",
@@ -110,6 +141,7 @@ export default function App() {
   const [priceModal, setPriceModal] = useState(false);
   const [pendingPriceDesc, setPendingPriceDesc] = useState("");
   const priceFileRef = useRef();
+  const mdFileRef = useRef();
   const openPriceQuickAdd = (foodName) => { setPendingPriceDesc(foodName); setView("prices"); setPriceModal(true); };
   const fileRef = useRef();
   const toggleExcl = k => setExcl(p=>{ const n={...p}; n[k]?delete n[k]:n[k]=true; return n; });
@@ -165,6 +197,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
       const clean = txt.replace(/```json\n?/g,"").replace(/```\n?/g,"").trim();
       const parsed = JSON.parse(clean);
       setDiet(parsed);
+      store.set("dm-diet-md", dietToMarkdown(parsed));
       if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
       if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
       setLmsg("✓ Piano caricato!");
@@ -175,6 +208,24 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
       setTimeout(()=>setLoading(false),4000);
     }
   },[]);
+
+  const importMD = useCallback(async (file) => {
+    setLoading(true); setLmsg("Lettura file Markdown...");
+    try {
+      const text = await file.text();
+      const parsed = markdownToDiet(text);
+      setDiet(parsed);
+      store.set("dm-diet-md", text);
+      if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
+      if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
+      setLmsg("✓ Piano caricato dal Markdown!");
+      setTimeout(()=>{ setLoading(false); setView("ov"); }, 500);
+    } catch(err) {
+      console.error(err);
+      setLmsg("❌ "+err.message);
+      setTimeout(()=>setLoading(false), 3000);
+    }
+  }, []);
 
   // Generate calendar automatically
   const genCal = useCallback(()=>{
@@ -281,6 +332,17 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
           <span style={{...S.muted,fontSize:12}}>Piano attivo: {diet.patient?.name}</span>
           <button style={S.btnG} onClick={()=>setView("ov")}>Apri →</button>
         </div>}
+        <div style={{marginTop:14,borderTop:"1px solid #21262d",paddingTop:14}}>
+          <div style={{fontSize:11,color:"#6e7681",marginBottom:8,textAlign:"left"}}>
+            Hai già esportato il piano in <strong style={{color:"#8b949e"}}>.md</strong>? Caricalo senza consumare token AI.
+          </div>
+          <button style={{...S.btnG,width:"100%",padding:"10px",fontSize:12,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}
+            onClick={()=>mdFileRef.current?.click()}>
+            📝 Importa Markdown (.md)
+          </button>
+          <input ref={mdFileRef} type="file" accept=".md,text/markdown" style={{display:"none"}}
+            onChange={e=>{const f=e.target.files?.[0];if(f)importMD(f);e.target.value="";}}/>
+        </div>
       </div>
       <div style={{...S.card,...S.cardP,fontSize:12,color:"#6e7681",lineHeight:1.7}}>
         <div style={{fontWeight:700,color:"#8b949e",marginBottom:6,fontSize:11}}>Funzionalità</div>
@@ -933,6 +995,14 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
             </button>
           ))}
           <button style={{...S.btnG,padding:"4px 10px",fontSize:12}} onClick={()=>setView("up")}>+ PDF</button>
+          {diet&&<button style={{...S.btnG,padding:"4px 10px",fontSize:12}} onClick={()=>{
+            const md=dietToMarkdown(diet);
+            const blob=new Blob([md],{type:"text/markdown"});
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement("a");
+            a.href=url; a.download=`piano_${(diet.patient?.name||"dieta").replace(/\s+/g,"_").toLowerCase()}.md`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+          }}>💾 .md</button>}
         </div>
       </div>
       <div style={S.body}>
