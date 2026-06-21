@@ -1,4 +1,30 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import DEFAULT_PRICES from "../data/prezzario_conad.json";
+
+// Tauri filesystem helpers — no-op gracefully in browser mode
+const isTauri = () => typeof window !== "undefined" && !!window.__TAURI_INTERNALS__;
+
+async function tauriReadMd(filename) {
+  if (!isTauri()) return null;
+  try {
+    const { readTextFile, BaseDirectory } = await import("@tauri-apps/plugin-fs");
+    const { appLocalDataDir } = await import("@tauri-apps/api/path");
+    const dir = await appLocalDataDir();
+    const text = await readTextFile(dir + filename);
+    return text;
+  } catch { return null; }
+}
+
+async function tauriWriteMd(filename, content) {
+  if (!isTauri()) return false;
+  try {
+    const { writeTextFile } = await import("@tauri-apps/plugin-fs");
+    const { appLocalDataDir } = await import("@tauri-apps/api/path");
+    const dir = await appLocalDataDir();
+    await writeTextFile(dir + filename, content);
+    return true;
+  } catch { return false; }
+}
 
 const MODEL = "claude-sonnet-4-20250514";
 const MI = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
@@ -11,8 +37,12 @@ const ACTS = {
   repetitions: { c:"#fb923c", bg:"rgba(251,146,60,.13)",  label:"Ripetute" },
   bike:        { c:"#4ade80", bg:"rgba(74,222,128,.12)",  label:"Lungo BDC" },
   run:         { c:"#f87171", bg:"rgba(248,113,113,.12)", label:"Lungo RUN" },
+  weights:     { c:"#fbbf24", bg:"rgba(251,191,36,.12)",  label:"Palestra/Pesi" },
+  other:       { c:"#6b7280", bg:"rgba(107,114,128,.11)", label:"Altro" },
 };
-const DOW_ACT = {0:"run",1:"tabata",2:"endurance",3:"rest",4:"repetitions",5:"tabata",6:"bike"};
+const getAct = t => ACTS[t] || ACTS.other;
+const DEFAULT_DOW_ACT = {0:"run",1:"tabata",2:"endurance",3:"rest",4:"repetitions",5:"tabata",6:"bike"};
+const DOW_LABELS = [[1,"Lunedì"],[2,"Martedì"],[3,"Mercoledì"],[4,"Giovedì"],[5,"Venerdì"],[6,"Sabato"],[0,"Domenica"]];
 
 const dk = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 const pd = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
@@ -26,9 +56,6 @@ const store = {
   async del(k){ delete store.data[k]; try{ await window.storage.delete(k); }catch(e){} },
 };
 
-// Prezzario Conad — estratto da scontrini reali (31/05/26 + altro)
-const DEFAULT_PRICES = {"negozio": "Conad", "ultimoAggiornamento": "2026-05-31", "fonti": [{"data": "2026-05-31", "ora": "11:47", "documento": "DOC.0263-0005", "totale": 155.9}, {"data": "non specificata", "documento": "scontrino 2", "totale": 134.91}], "ivaAliquote": {"A": 4.0, "B": 5.0, "C": 10.0, "D": 22.0}, "legendaIva": {"A": "Aliquota 4% — alimentari di base (frutta, verdura, pane, latte, pasta)", "B": "Aliquota 5% — non osservata in questi scontrini", "C": "Aliquota 10% — alimentari trasformati/conservati", "D": "Aliquota 22% — bevande gassate/zuccherate, prodotti non alimentari"}, "prodotti": [{"id": "zucchine", "descrizione": "ZUCCHINE SCURE", "nomePiano": "Zucchine", "categoria": "frutta_verdura", "tipoPrezzo": "peso_variabile", "prezzo": 2.36, "unita": "acquisto", "iva": "A", "occorrenze": [2.41, 2.31], "note": "Prezzo variabile in base al peso pesato in cassa. Media tra 2 acquisti.", "presenteNelPiano": true}, {"id": "carote", "descrizione": "CAROTE", "nomePiano": "Carote", "categoria": "frutta_verdura", "tipoPrezzo": "peso_variabile", "prezzo": 1.11, "unita": "acquisto", "iva": "A", "occorrenze": [1.53, 0.68], "note": "Prezzo variabile in base al peso. Forte variazione tra i 2 acquisti (peso diverso).", "presenteNelPiano": true}, {"id": "pomodori", "descrizione": "POMODORO GRAPPOLO", "nomePiano": "Pomodori freschi", "categoria": "frutta_verdura", "tipoPrezzo": "peso_variabile", "prezzo": 2.11, "unita": "acquisto", "iva": "A", "occorrenze": [2.11], "note": "Pomodoro a grappolo", "presenteNelPiano": true}, {"id": "mele", "descrizione": "MELE GRANNY 75-80", "nomePiano": "Mele", "categoria": "frutta_verdura", "tipoPrezzo": "peso_variabile", "prezzo": 1.99, "unita": "acquisto", "iva": "A", "occorrenze": [1.99, 1.99], "note": "Varietà Granny Smith calibro 75-80", "presenteNelPiano": true}, {"id": "pesche", "descrizione": "PESCHE NOCI", "nomePiano": "Pesche", "categoria": "frutta_verdura", "tipoPrezzo": "peso_variabile", "prezzo": 3.74, "unita": "acquisto", "iva": "A", "occorrenze": [3.49, 3.98], "note": "Pesche noci", "presenteNelPiano": true}, {"id": "kiwi", "descrizione": "KIWI ESTERI / HAYWARD", "nomePiano": "Kiwi", "categoria": "frutta_verdura", "tipoPrezzo": "peso_variabile", "prezzo": 1.51, "unita": "acquisto", "iva": "A", "occorrenze": [2.43, 0.58], "note": "Forte variazione: probabilmente quantità diverse acquistate", "presenteNelPiano": true}, {"id": "albicocche", "descrizione": "ALBICOCCHE", "nomePiano": "Albicocche", "categoria": "frutta_verdura", "tipoPrezzo": "peso_variabile", "prezzo": 1.0, "unita": "acquisto", "iva": "A", "occorrenze": [1.0], "note": "", "presenteNelPiano": true}, {"id": "prugne", "descrizione": "SUSINE ROSSE", "nomePiano": "Prugne / susine", "categoria": "frutta_verdura", "tipoPrezzo": "peso_variabile", "prezzo": 1.21, "unita": "acquisto", "iva": "A", "occorrenze": [1.44, 0.97], "note": "", "presenteNelPiano": true}, {"id": "banana", "descrizione": "BANANE CPQ", "nomePiano": "Banane", "categoria": "frutta_verdura", "tipoPrezzo": "peso_variabile", "prezzo": 1.1, "unita": "acquisto", "iva": "A", "occorrenze": [1.1], "note": "cpq = confezione pre-pesata", "presenteNelPiano": true}, {"id": "patate", "descrizione": "PATATE", "nomePiano": "Patate", "categoria": "frutta_verdura", "tipoPrezzo": "peso_variabile", "prezzo": 1.09, "unita": "acquisto", "iva": "A", "occorrenze": [1.09], "note": "", "presenteNelPiano": true}, {"id": "rucola", "descrizione": "RUCOLA cpq 70-125gr", "nomePiano": "Rucola", "categoria": "frutta_verdura", "tipoPrezzo": "confezione", "prezzo": 0.89, "unita": "pezzo", "iva": "A", "occorrenze": [1.39, 0.89, 0.89], "note": "Formato 70gr a 0.89€, formato 125gr a 1.39€. Prezzo di riferimento: 70gr.", "presenteNelPiano": true}, {"id": "lattuga_iceberg", "descrizione": "ICEBERG JULIENNE 500", "nomePiano": "Lattuga iceberg", "categoria": "frutta_verdura", "tipoPrezzo": "confezione", "prezzo": 2.49, "unita": "pezzo", "iva": "A", "occorrenze": [2.49], "note": "Busta 500g già tagliata julienne", "presenteNelPiano": true}, {"id": "valerianella", "descrizione": "VALERIANA cpq 125gr", "nomePiano": "Valerianella", "categoria": "frutta_verdura", "tipoPrezzo": "confezione", "prezzo": 1.49, "unita": "pezzo", "iva": "A", "occorrenze": [1.49], "note": "Confezione 125g", "presenteNelPiano": true}, {"id": "spinaci", "descrizione": "SPINACI SOFFICI / FOGLIA VERDE", "nomePiano": "Spinaci al vapore", "categoria": "frutta_verdura", "tipoPrezzo": "confezione", "prezzo": 1.99, "unita": "pezzo", "iva": "A", "occorrenze": [1.99, 1.99], "note": "Surgelati, busta singola", "presenteNelPiano": true}, {"id": "fagiolini", "descrizione": "FAGIOLINI E PATATE B", "nomePiano": "Fagiolini", "categoria": "frutta_verdura", "tipoPrezzo": "confezione", "prezzo": 1.39, "unita": "pezzo", "iva": "A", "occorrenze": [2.19], "note": "Prezzo netto dopo sconto -0.80 (2.19-0.80=1.39). Surgelati misti fagiolini+patate.", "presenteNelPiano": true}, {"id": "noci", "descrizione": "NOCI SGUSC.CONAD CAL", "nomePiano": "Noci", "categoria": "frutta_secca", "tipoPrezzo": "confezione", "prezzo": 5.25, "unita": "pezzo", "iva": "A", "occorrenze": [5.25], "note": "Formato grande, calibrate, sgusciate", "presenteNelPiano": true}, {"id": "actimel", "descrizione": "ACTIMEL IMMUNO PLUS / ACTIMEL+ FRAGOLA", "nomePiano": "Yogurt con fermenti (Actimel)", "categoria": "latticini", "tipoPrezzo": "confezione", "prezzo": 3.59, "unita": "pezzo", "iva": "C", "occorrenze": [3.59, 3.59], "note": "Confezione multipack (8 flaconcini circa)", "presenteNelPiano": true}, {"id": "fiocchi_latte", "descrizione": "FIOCCHI DI LATTE PIA", "nomePiano": "Fiocchi di latte", "categoria": "latticini", "tipoPrezzo": "confezione", "prezzo": 1.35, "unita": "pezzo", "iva": "A", "occorrenze": [1.35], "note": "Prezzo netto con promo 2x1 (pagato 1 su 2 acquistati)", "presenteNelPiano": true}, {"id": "yogurt_total0", "descrizione": "YOG.TOT 0% BIANCO", "nomePiano": "Yogurt scremato bianco / Yogurt greco scr. bianco", "categoria": "latticini", "tipoPrezzo": "confezione", "prezzo": 2.72, "unita": "pezzo", "iva": "C", "occorrenze": [3.89, 1.55], "note": "Formato grande 3.89€, formato singolo 1.55€", "presenteNelPiano": true}, {"id": "mozzarella_proteica", "descrizione": "MOZZARELLA PROTEICA", "nomePiano": "Mozzarella proteica (Granarolo Benessere)", "categoria": "latticini", "tipoPrezzo": "confezione", "prezzo": 1.39, "unita": "pezzo", "iva": "A", "occorrenze": [1.39, 1.39], "note": "Prezzo costante in entrambi gli scontrini", "presenteNelPiano": true}, {"id": "philadelphia_yog", "descrizione": "PHILADELPHIA C/YOGURT", "nomePiano": "Philadelphia (variante)", "categoria": "latticini", "tipoPrezzo": "confezione", "prezzo": 1.79, "unita": "pezzo", "iva": "A", "occorrenze": [2.09], "note": "Prezzo netto dopo sconto -0.30", "presenteNelPiano": true}, {"id": "philadelphia_no_lattosio", "descrizione": "PHILADELPHIA SENZA LATTOSIO", "nomePiano": "Philadelphia (variante senza lattosio)", "categoria": "latticini", "tipoPrezzo": "confezione", "prezzo": 1.79, "unita": "pezzo", "iva": "A", "occorrenze": [2.35], "note": "Prezzo netto dopo sconto -0.56", "presenteNelPiano": true}, {"id": "philadelphia_protein", "descrizione": "PHILADELPHIA PROTEIN", "nomePiano": "Philadelphia Protein", "categoria": "latticini", "tipoPrezzo": "confezione", "prezzo": 3.58, "unita": "pezzo", "iva": "A", "occorrenze": [4.3], "note": "MATCH ESATTO col piano. Prezzo netto dopo sconto -0.72 (4.30-0.72=3.58)", "presenteNelPiano": true}, {"id": "latte_ps", "descrizione": "LAT.UHT PS AD C.LR B", "nomePiano": "Latte parzialmente scremato", "categoria": "latticini", "tipoPrezzo": "confezione", "prezzo": 1.19, "unita": "pezzo", "iva": "A", "occorrenze": [1.19, 1.19], "note": "Prezzo costante in entrambi gli scontrini. Probabile formato 1L.", "presenteNelPiano": true}, {"id": "ricotta_light", "descrizione": "RICOTTA LIGHT PIACERI", "nomePiano": "Ricotta light", "categoria": "latticini", "tipoPrezzo": "confezione", "prezzo": 1.29, "unita": "pezzo", "iva": "A", "occorrenze": [2.58], "note": "Prezzo netto con promo 2x1 (2.58-1.29=1.29)", "presenteNelPiano": true}, {"id": "hipro_drink", "descrizione": "HIPRO DRINK VANIGLIA/STRACCIATELLA", "nomePiano": "High Protein Drink (sostituto Ehrmann)", "categoria": "latticini", "tipoPrezzo": "confezione", "prezzo": 1.74, "unita": "pezzo", "iva": "C", "occorrenze": [1.49, 2.19], "note": "Marca Hipro al posto di Ehrmann citato nel piano. Prezzo netto dopo sconto fornitore.", "presenteNelPiano": true}, {"id": "hipro_mirtillo", "descrizione": "HIPRO MIRTILLO 160g", "nomePiano": "Dessert proteico (variante mirtillo)", "categoria": "latticini", "tipoPrezzo": "confezione", "prezzo": 0.99, "unita": "pezzo", "iva": "C", "occorrenze": [1.49], "note": "Prezzo netto dopo sconto -0.50", "presenteNelPiano": true}, {"id": "salmone_affumicato", "descrizione": "SALMONE AFF.CONVENIENZA", "nomePiano": "Salmone affumicato", "categoria": "carne_pesce", "tipoPrezzo": "confezione", "prezzo": 6.99, "unita": "pezzo", "iva": "C", "occorrenze": [9.69], "note": "Prezzo netto dopo sconto -2.70 (9.69-2.70=6.99)", "presenteNelPiano": true}, {"id": "hamburger_manzo", "descrizione": "HAMBURGER SCOTTONA S", "nomePiano": "Hamburger di manzo", "categoria": "carne_pesce", "tipoPrezzo": "confezione", "prezzo": 4.4, "unita": "pezzo", "iva": "C", "occorrenze": [4.4], "note": "Carne di scottona", "presenteNelPiano": true}, {"id": "pollo_petto", "descrizione": "PETTO DI POLLO A FETTE", "nomePiano": "Petto di pollo", "categoria": "carne_pesce", "tipoPrezzo": "confezione", "prezzo": 3.15, "unita": "pezzo", "iva": "C", "occorrenze": [3.15], "note": "Vassoio a fette, banco macelleria", "presenteNelPiano": true}, {"id": "salmone_filetti", "descrizione": "SALMONE FETTE NORVEGESE / FILETTO FRESCO", "nomePiano": "Salmone (filetti)", "categoria": "carne_pesce", "tipoPrezzo": "confezione", "prezzo": 3.27, "unita": "pezzo", "iva": "C", "occorrenze": [3.29, 3.25], "note": "Filetti freschi norvegesi", "presenteNelPiano": true}, {"id": "orata_filetti", "descrizione": "FILETTI DI ORATA EST", "nomePiano": "Orata (filetti)", "categoria": "carne_pesce", "tipoPrezzo": "confezione", "prezzo": 4.69, "unita": "pezzo", "iva": "C", "occorrenze": [4.69], "note": "MATCH ESATTO col piano", "presenteNelPiano": true}, {"id": "manzo_inglese", "descrizione": "MANZO ALL'INGLESE", "nomePiano": "Manzo magro (fesa/roast beef)", "categoria": "carne_pesce", "tipoPrezzo": "confezione", "prezzo": 3.84, "unita": "pezzo", "iva": "C", "occorrenze": [3.65, 4.02], "note": "Roast beef pronto - molto simile al \"manzo magro\" del piano", "presenteNelPiano": true}, {"id": "tonno_naturale", "descrizione": "TONNO VERONATURALE M", "nomePiano": "Tonno al naturale", "categoria": "carne_pesce", "tipoPrezzo": "confezione", "prezzo": 5.39, "unita": "pezzo", "iva": "C", "occorrenze": [8.69], "note": "MATCH ESATTO col piano. Confezione multipack, prezzo netto dopo sconto -3.30", "presenteNelPiano": true}, {"id": "merluzzo_gratin", "descrizione": "FIL.MERL.GRAT.MELANZANE/ERBE", "nomePiano": "Filetti merluzzo gratin patate Findus", "categoria": "carne_pesce", "tipoPrezzo": "confezione", "prezzo": 2.99, "unita": "pezzo", "iva": "C", "occorrenze": [5.99, 5.99], "note": "Varianti diverse da quella citata nel piano (patate+rosmarino) ma stesso tipo di prodotto surgelato. Prezzo netto dopo sconto -3.00 cad.", "presenteNelPiano": true}, {"id": "pane_tramezzino", "descrizione": "PANE PER TRAMEZZINO", "nomePiano": "Pane a fette / pane integrale", "categoria": "cereali_pane", "tipoPrezzo": "confezione", "prezzo": 1.59, "unita": "pezzo", "iva": "A", "occorrenze": [1.59], "note": "Non integrale - verificare se necessaria versione integrale", "presenteNelPiano": true}, {"id": "pane_forno", "descrizione": "FORNO TRADIZIONALE (pane)", "nomePiano": "Pane integrale fresco / Pane di frumento", "categoria": "cereali_pane", "tipoPrezzo": "peso_variabile", "prezzo": 0.87, "unita": "acquisto", "iva": "C", "occorrenze": [1.11, 0.64, 0.85], "note": "Banco forno, peso variabile in base al pezzo scelto", "presenteNelPiano": true}, {"id": "riso_carnaroli", "descrizione": "RISO CARNAROLI CURTI", "nomePiano": "Riso (generico)", "categoria": "cereali_pane", "tipoPrezzo": "confezione", "prezzo": 4.79, "unita": "pezzo", "iva": "A", "occorrenze": [4.79], "note": "Riso Carnaroli premium - più caro del riso standard del piano", "presenteNelPiano": true}, {"id": "riso_gallo", "descrizione": "RISO GALLO BLONDXINS", "nomePiano": "Riso integrale (possibile)", "categoria": "cereali_pane", "tipoPrezzo": "confezione", "prezzo": 1.89, "unita": "pezzo", "iva": "A", "occorrenze": [3.15], "note": "Prezzo netto dopo sconto -1.26. Verificare se integrale o bianco.", "presenteNelPiano": true}, {"id": "biscotti_saiwa", "descrizione": "BISC.SAIWA ORO 5 CEREALI", "nomePiano": "Biscotti secchi integrali (sostituto)", "categoria": "cereali_pane", "tipoPrezzo": "confezione", "prezzo": 2.29, "unita": "pezzo", "iva": "C", "occorrenze": [2.29], "note": "Non sono biscotti integrali puri - 5 cereali misti", "presenteNelPiano": true}, {"id": "ceci_vaso", "descrizione": "CECI VASO VETRO CONAD", "nomePiano": "Ceci in scatola", "categoria": "legumi_conserve", "tipoPrezzo": "confezione", "prezzo": 0.89, "unita": "pezzo", "iva": "C", "occorrenze": [1.78], "note": "Prezzo per singolo vaso (1.78 era per 2 pezzi)", "presenteNelPiano": true}, {"id": "passata_pomodoro", "descrizione": "PASSATA POM.BIO VERS", "nomePiano": "Pomodori (passata)", "categoria": "legumi_conserve", "tipoPrezzo": "confezione", "prezzo": 1.0, "unita": "pezzo", "iva": "A", "occorrenze": [1.45], "note": "Prezzo netto dopo sconto -0.45", "presenteNelPiano": true}, {"id": "pelati", "descrizione": "PELATI CIRIO", "nomePiano": "Pomodori pelati", "categoria": "legumi_conserve", "tipoPrezzo": "confezione", "prezzo": 0.99, "unita": "pezzo", "iva": "A", "occorrenze": [1.29], "note": "Prezzo netto dopo sconto -0.30", "presenteNelPiano": true}, {"id": "ragu_carne", "descrizione": "RAGU STAR CARNE LATTE", "nomePiano": "Ragù di carne fresco", "categoria": "legumi_conserve", "tipoPrezzo": "confezione", "prezzo": 2.23, "unita": "pezzo", "iva": "C", "occorrenze": [2.99], "note": "Ragù pronto in vasetto, non fresco da banco come nel piano. Prezzo netto dopo sconto -0.76", "presenteNelPiano": true}, {"id": "olive_verdi", "descrizione": "OLIVE VERDI DEN.CONAD", "nomePiano": "Olive verdi", "categoria": "condimenti", "tipoPrezzo": "confezione", "prezzo": 1.59, "unita": "pezzo", "iva": "C", "occorrenze": [4.77], "note": "Prezzo per singolo vasetto (4.77 era per 3 pezzi)", "presenteNelPiano": true}, {"id": "miele", "descrizione": "MIELE AMBROSOLI MILLEFIORI", "nomePiano": "Miele", "categoria": "condimenti", "tipoPrezzo": "confezione", "prezzo": 3.85, "unita": "pezzo", "iva": "C", "occorrenze": [3.85], "note": "", "presenteNelPiano": true}, {"id": "ketchup", "descrizione": "KETCHUP MULTIPACK CONAD", "nomePiano": "Salsa ketchup", "categoria": "condimenti", "tipoPrezzo": "confezione", "prezzo": 0.99, "unita": "pezzo", "iva": "C", "occorrenze": [0.99], "note": "", "presenteNelPiano": true}, {"id": "cioccolato_85", "descrizione": "TAV.EXCELL.85%CACAO", "nomePiano": "Cioccolato fondente 80% (variante 85%)", "categoria": "altro", "tipoPrezzo": "confezione", "prezzo": 3.29, "unita": "pezzo", "iva": "C", "occorrenze": [3.69], "note": "85% invece di 80% indicato nel piano. Prezzo netto dopo sconto -0.40", "presenteNelPiano": true}, {"id": "cioccolato_78", "descrizione": "TAV.EXCELL.78%CACAO", "nomePiano": "Cioccolato fondente 80% (variante 78%)", "categoria": "altro", "tipoPrezzo": "confezione", "prezzo": 3.29, "unita": "pezzo", "iva": "C", "occorrenze": [7.38], "note": "78% invece di 80% indicato nel piano. Prezzo netto per singola tavoletta dopo sconto (7.38-0.80)/2", "presenteNelPiano": true}, {"id": "succo_arancia", "descrizione": "SUCCO S/ZUC.AGG.ARANCIA", "nomePiano": "Succo arancia rossa 100%", "categoria": "altro", "tipoPrezzo": "confezione", "prezzo": 1.89, "unita": "pezzo", "iva": "D", "occorrenze": [1.89], "note": "Senza zuccheri aggiunti - molto simile alla richiesta del piano", "presenteNelPiano": true}, {"id": "pizza_verdure", "descrizione": "PIZZA LASAPORITA VERDURE", "nomePiano": "Pizza vegetariana surgelata", "categoria": "altro", "tipoPrezzo": "confezione", "prezzo": 2.69, "unita": "pezzo", "iva": "C", "occorrenze": [2.69], "note": "MATCH ESATTO col piano", "presenteNelPiano": true}, {"id": "frulla_mela", "descrizione": "FRULLA' BIO MELA DOY", "categoria": "altro", "prezzo": 0.98, "unita": "pezzo", "iva": "C", "occorrenze": [0.98, 0.98, 0.98], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "ciliegie", "descrizione": "CILIEGIA ITA CPQ 2", "categoria": "frutta_verdura", "prezzo": 1.49, "unita": "acquisto", "iva": "A", "occorrenze": [1.49, 1.49], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "peso_variabile", "note": ""}, {"id": "ananas", "descrizione": "ANANAS", "categoria": "frutta_verdura", "prezzo": 1.77, "unita": "acquisto", "iva": "A", "occorrenze": [1.77], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "peso_variabile", "note": ""}, {"id": "cetrioli", "descrizione": "CETRIOLI", "categoria": "frutta_verdura", "prezzo": 0.54, "unita": "acquisto", "iva": "A", "occorrenze": [0.54], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "peso_variabile", "note": ""}, {"id": "semi_chia", "descrizione": "SEMI DI CHIA NERA", "categoria": "condimenti", "prezzo": 2.69, "unita": "pezzo", "iva": "C", "occorrenze": [2.69], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "prosciutto_cotto", "descrizione": "PROSC.COTTO A.Q.F&C", "categoria": "carne_pesce", "prezzo": 1.79, "unita": "pezzo", "iva": "C", "occorrenze": [1.79], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "piadina_olio", "descrizione": "PIADINA FRESCA OLIO", "categoria": "cereali_pane", "prezzo": 1.99, "unita": "pezzo", "iva": "A", "occorrenze": [1.99], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "mortadella", "descrizione": "MORTADELLA IGP FIRMA", "categoria": "carne_pesce", "prezzo": 2.72, "unita": "pezzo", "iva": "C", "occorrenze": [4.98], "note": "netto dopo sconto -2.26", "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione"}, {"id": "pasta_brisee", "descrizione": "PASTA BRISEE CONAD", "categoria": "altro", "prezzo": 1.15, "unita": "pezzo", "iva": "C", "occorrenze": [1.15], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "pasta_pizza", "descrizione": "PASTA PER PIZZA", "categoria": "altro", "prezzo": 1.49, "unita": "pezzo", "iva": "C", "occorrenze": [1.49], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "pasta_sfoglia_rett", "descrizione": "PASTA SFOGLIA RETTANGOLARE", "categoria": "altro", "prezzo": 1.15, "unita": "pezzo", "iva": "C", "occorrenze": [1.15], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "pasta_sfoglia_rot", "descrizione": "PASTA SFOGLIA ROTONDA", "categoria": "altro", "prezzo": 1.15, "unita": "pezzo", "iva": "C", "occorrenze": [1.15], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "fioc_fond", "descrizione": "FIOC.FR.INT.FOND.PIA", "categoria": "altro", "prezzo": 2.59, "unita": "pezzo", "iva": "C", "occorrenze": [2.59], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "cavallo_sfilacci", "descrizione": "CAVALLO SFILACCI X1", "categoria": "carne_pesce", "prezzo": 4.8, "unita": "pezzo", "iva": "C", "occorrenze": [4.8, 4.8], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "mozzarella_grande", "descrizione": "MOZZARELLA P", "categoria": "latticini", "prezzo": 3.19, "unita": "pezzo", "iva": "A", "occorrenze": [3.19], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "mayo", "descrizione": "MAYO TD HEINZ 395g", "categoria": "condimenti", "prezzo": 1.99, "unita": "pezzo", "iva": "C", "occorrenze": [3.19], "note": "netto dopo sconto -1.20", "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione"}, {"id": "patatine", "descrizione": "PATATINE CLASSICHE S", "categoria": "altro", "prezzo": 4.19, "unita": "pezzo", "iva": "C", "occorrenze": [4.19], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "cetrioli_sacla", "descrizione": "CETRIOLI SACLA 290g", "categoria": "condimenti", "prezzo": 1.79, "unita": "pezzo", "iva": "C", "occorrenze": [1.79], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "cipolline_aceto", "descrizione": "CIPOLLINE ACETO CONAD", "categoria": "condimenti", "prezzo": 0.99, "unita": "pezzo", "iva": "C", "occorrenze": [0.99], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "pomodori_secchi", "descrizione": "POMODORI SECCHI OLIO", "categoria": "condimenti", "prezzo": 2.39, "unita": "pezzo", "iva": "C", "occorrenze": [2.39], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "taralli", "descrizione": "TARALLI FINOCCHIO", "categoria": "altro", "prezzo": 1.59, "unita": "pezzo", "iva": "C", "occorrenze": [1.59], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "estathe_limone", "descrizione": "ESTATHE BOTT.LIMONE/PET", "categoria": "bevande", "prezzo": 1.69, "unita": "pezzo", "iva": "D", "occorrenze": [1.99, 1.99], "note": "netto dopo sconti", "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione"}, {"id": "coca_cola", "descrizione": "COCA COLA REGULAR/ZERO", "categoria": "bevande", "prezzo": 2.29, "unita": "pezzo", "iva": "D", "occorrenze": [2.29, 3.89], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "taccole", "descrizione": "TACCOLE BONDUELLE", "categoria": "frutta_verdura", "prezzo": 1.89, "unita": "pezzo", "iva": "A", "occorrenze": [1.89], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "edamer", "descrizione": "EDAMER A FETTE BAYER", "categoria": "latticini", "prezzo": 2.15, "unita": "pezzo", "iva": "A", "occorrenze": [2.14, 2.16], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "fatina_mandorle", "descrizione": "FATINA MAND.TOST.NO", "categoria": "altro", "prezzo": 2.79, "unita": "pezzo", "iva": "C", "occorrenze": [2.79], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "frulla_mela_fragola", "descrizione": "FRULLA'BIO MELA-FRAGOLA", "categoria": "altro", "prezzo": 0.98, "unita": "pezzo", "iva": "C", "occorrenze": [0.98, 0.98], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "yog_vipiteno", "descrizione": "YOG.VIPITENO MAGRO", "categoria": "latticini", "prezzo": 0.89, "unita": "pezzo", "iva": "C", "occorrenze": [0.89], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "mozzarella_no_lattosio", "descrizione": "MOZZARELLA SENZA LATTOSIO", "categoria": "latticini", "prezzo": 1.19, "unita": "pezzo", "iva": "A", "occorrenze": [1.45], "note": "netto dopo sconto -0.26", "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione"}, {"id": "nutella", "descrizione": "NUTELLA COPPETTA X6", "categoria": "altro", "prezzo": 1.69, "unita": "pezzo", "iva": "C", "occorrenze": [1.69], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "piadina_snack", "descrizione": "PIADINA SNACK CLASSICA", "categoria": "altro", "prezzo": 1.59, "unita": "pezzo", "iva": "A", "occorrenze": [2.29], "note": "netto dopo sconto -0.70", "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione"}, {"id": "candeggina", "descrizione": "CAND CONAD PROFUMATA", "categoria": "non_alimentare", "prezzo": 1.69, "unita": "pezzo", "iva": "D", "occorrenze": [1.69], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "sale_lavastoviglie", "descrizione": "SALE PER LAVASTOVIGLIE", "categoria": "non_alimentare", "prezzo": 1.39, "unita": "pezzo", "iva": "D", "occorrenze": [1.39], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "pizza_prosciutto", "descrizione": "PIZZA LASAPORITA PROSCIUTTO", "categoria": "altro", "prezzo": 2.69, "unita": "pezzo", "iva": "C", "occorrenze": [2.69], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "tris_grigliato", "descrizione": "TRIS GRIGLIATO + GUSTO", "categoria": "frutta_verdura", "prezzo": 2.49, "unita": "pezzo", "iva": "C", "occorrenze": [2.49], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "gnocchetti_sorrentina", "descrizione": "GNOCCHETTI ALLA SORRENTINA", "categoria": "altro", "prezzo": 3.99, "unita": "pezzo", "iva": "C", "occorrenze": [3.99], "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "confezione", "note": ""}, {"id": "banco_tradizionale", "descrizione": "BANCO TRADIZIONALE (generico)", "categoria": "altro", "prezzo": 3.45, "unita": "acquisto", "iva": "C", "occorrenze": [3.1, 4.16], "note": "Voce generica banco gastronomia/macelleria, non specifica", "presenteNelPiano": false, "nomePiano": null, "tipoPrezzo": "peso_variabile"}]};
-
 // Normalizza stringa per il matching (minuscolo, senza accenti)
 const norm = s => (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
 
@@ -41,6 +68,98 @@ function findPriceFor(prices, foodName){
   if(p) return p;
   p = prices.prodotti.find(x=>x.nomePiano && (n.includes(norm(x.nomePiano))||norm(x.nomePiano).includes(n)));
   return p||null;
+}
+
+const DIET_AI_PROMPT = `Analizza questo piano alimentare ed estrai i dati nel formato JSON seguente. Usa null per i valori assenti. Non inventare numeri. Restituisci SOLO JSON valido, nessun testo aggiuntivo.
+
+{"patient":{"name":null,"weight":null,"targetWeight":null,"height":null,"bmi":null,"bmr":null,"fat":null,"ffm":null},"period":{"startDate":null,"checkupDate":null,"checkupTime":null},"avgKcal":null,"macros":{"protein":null,"carbs":null,"fats":null},"days":[{"n":1,"activity":"descrizione attività","activityType":"rest","kcal":null,"macros":{"prot":null,"carb":null,"fat":null},"meals":[{"name":"Colazione","icon":"☀️","foods":[{"name":"alimento","qty":"150g","kcal":null,"isSupplement":false}]}],"condiments":{},"supplements":[]}]}
+
+Regole:
+- Estrai TUTTI i giorni presenti nel documento
+- activityType: rest=riposo/giorno libero, tabata=HIIT/tabata/cyclette alta intensità, endurance=corsa lenta o lunga distanza, repetitions=ripetute velocità, bike=ciclismo/bici da corsa, run=corsa lunga, weights=palestra/pesi/resistance training, other=qualsiasi altro sport o attività non classificabile
+- icon pasto: ☀️=colazione, 🥗=pranzo, 🍽️=cena, 🍎=spuntino mattutino, 🌙=spuntino serale, ⚡=pre o post allenamento
+- isSupplement=true per: proteine whey, creatina, gel energetici, barrette sportive, BCAA, aminoacidi, multivitaminici, integratori sportivi
+- condiments: oggetto nome→grammi SOLO per condimenti con dose giornaliera esplicita (es. {"Olio EVO":10,"Parmigiano":5}); {} se assenti
+- supplements: array di nomi integratori del giorno (non alimenti normali)
+- Tutti i campi numerici devono essere numeri o null, mai stringhe vuote`;
+
+const SUPPLEMENT_URLS = {
+  "proteine del siero":    "https://www.yamamotonutrition.com/it_it/yamamoto-nutrition-iso-fuji-volactiver-700-grammi-p00032643",
+  "prostar whey":          "https://www.yamamotonutrition.com/it_it/yamamoto-nutrition-iso-fuji-volactiver-700-grammi-p00032643",
+  "yamamoto":              "https://www.yamamotonutrition.com/it_it/yamamoto-nutrition-iso-fuji-volactiver-700-grammi-p00032643",
+  "carbogel":              "https://www.scienceinsport.com/it/shop-sis/go-range/gel-beta-fuel-sis",
+  "gel beta fuel":         "https://www.scienceinsport.com/it/shop-sis/go-range/gel-beta-fuel-sis",
+  "barretta energetica":   "https://www.scienceinsport.com/it/compra-su-sis/go-range/go-energy-bars/beta-fuel-energy-bar-sis",
+  "beta fuel energy bar":  "https://www.scienceinsport.com/it/compra-su-sis/go-range/go-energy-bars/beta-fuel-energy-bar-sis",
+  "isocarb":               "https://www.redcare.it/fitness/IT981043351/enervit-isocarb-c2-1pro.htm",
+  "enervit isocarb":       "https://www.redcare.it/fitness/IT981043351/enervit-isocarb-c2-1pro.htm",
+};
+const getSupplementUrl = name => {
+  const n = norm(name);
+  for(const [key, url] of Object.entries(SUPPLEMENT_URLS)) {
+    if(n.includes(norm(key))) return url;
+  }
+  return null;
+};
+
+async function callAI(content) {
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": import.meta.env.VITE_ANTHROPIC_KEY,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({ model: MODEL, max_tokens: 8000, messages: [{ role: "user", content }] })
+  });
+  if (!resp.ok) { const t = await resp.text(); throw new Error(`API ${resp.status}: ${t.substring(0,120)}`); }
+  const data = await resp.json();
+  const txt = data.content?.find(c => c.type === "text")?.text || "";
+  return JSON.parse(txt.replace(/```json\n?/g,"").replace(/```\n?/g,"").trim());
+}
+
+function saveDiet(parsed, setDiet, setPlanS, setPlanE) {
+  const md = dietToMarkdown(parsed);
+  const filename = `piano_${(parsed.patient?.name||"dieta").replace(/\s+/g,"_").toLowerCase()}.md`;
+  setDiet(parsed);
+  store.set("dm-diet", parsed);
+  store.set("dm-diet-md", md);
+  store.set("dm-diet-md-filename", filename);
+  tauriWriteMd(filename, md);
+  if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
+  if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
+  return { md, filename };
+}
+
+function dietToMarkdown(d) {
+  const p = d.patient||{}, per = d.period||{};
+  const AL = {tabata:"TABATA + Cyclette",endurance:"Endurance",rest:"Riposo",repetitions:"Ripetute",bike:"Lungo BDC",run:"Lungo RUN"};
+  let md = `# Piano Alimentare — ${p.name||"Paziente"}\n\n`;
+  md += `**Peso**: ${p.weight}kg → **Obiettivo**: ${p.targetWeight}kg | **BMI**: ${p.bmi} | **BMR**: ${p.bmr} kcal\n`;
+  md += `**Massa grassa**: ${p.fat}% | **FFM**: ${p.ffm}kg\n\n`;
+  md += `**Periodo**: ${per.startDate||"?"} → ${per.checkupDate||"?"} | **Visita**: ${per.checkupDate||"?"} ore ${per.checkupTime||"?"}\n`;
+  md += `**Kcal medie**: ${d.avgKcal} | P: ${d.macros?.protein}g | C: ${d.macros?.carbs}g | G: ${d.macros?.fats}g\n\n---\n\n`;
+  (d.days||[]).forEach(day => {
+    md += `## Giorno ${day.n} — ${AL[day.activityType]||day.activity||""} | ${day.kcal} kcal\n`;
+    md += `P ${day.macros?.prot}g · C ${day.macros?.carb}g · G ${day.macros?.fat}g`;
+    if(day.condiments) Object.entries(day.condiments).filter(([,g])=>g>0).forEach(([name,g])=>{ md += ` | ${name} ${g}g`; });
+    md += `\n\n`;
+    (day.meals||[]).forEach(meal => {
+      md += `### ${meal.icon||""} ${meal.name}\n| Alimento | Qtà | Kcal |\n|---|---|---|\n`;
+      (meal.foods||[]).forEach(f => { md += `| ${f.isSupplement?"⚡ ":""}${f.name} | ${f.qty} | ${f.kcal} |\n`; });
+      md += `\n`;
+    });
+    if(day.supplements?.length) md += `**Integratori**: ${day.supplements.join(", ")}\n\n`;
+  });
+  md += `---\n\n<!-- diet-json\n${JSON.stringify(d)}\n-->\n`;
+  return md;
+}
+
+function markdownToDiet(text) {
+  const m = text.match(/<!--\s*diet-json\s*\n([\s\S]+?)\n\s*-->/);
+  if(!m) throw new Error("Nessun blocco diet-json trovato nel file .md");
+  return JSON.parse(m[1]);
 }
 
 const CAT_PRICE_LABELS = {
@@ -66,21 +185,21 @@ const S = {
   sbL:{ fontSize:9,color:"#6e7681",textTransform:"uppercase",letterSpacing:"0.07em",marginTop:2 },
   btn:{ background:"#238636",border:"1px solid #2ea043",borderRadius:6,padding:"6px 13px",fontSize:12,fontWeight:600,color:"#fff",cursor:"pointer" },
   btnB:{ background:"#1f6feb",border:"1px solid #388bfd",borderRadius:6,padding:"6px 13px",fontSize:12,fontWeight:600,color:"#fff",cursor:"pointer" },
-  btnG:{ background:"transparent",border:"1px solid #30363d",borderRadius:6,padding:"5px 9px",fontSize:12,fontWeight:600,color:"#8b949e",cursor:"pointer" },
+  btnG:{ background:"transparent",borderWidth:"1px",borderStyle:"solid",borderColor:"#30363d",borderRadius:6,padding:"5px 9px",fontSize:12,fontWeight:600,color:"#8b949e",cursor:"pointer" },
   inp:{ background:"#0d1117",border:"1px solid #30363d",borderRadius:6,padding:"6px 9px",fontSize:12,color:"#c9d1d9",outline:"none" },
   lbl:{ fontSize:10,color:"#6e7681",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.06em",display:"block",marginBottom:3 },
   row:{ display:"flex",gap:8,alignItems:"center",flexWrap:"wrap" },
   muted:{ color:"#6e7681" },
   cg:{ display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:2 },
   cdow:{ textAlign:"center",fontSize:10,fontWeight:700,color:"#6e7681",padding:"3px 0" },
-  dc:{ aspectRatio:"1",borderRadius:4,border:"1px solid #21262d",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:1,padding:2,transition:"all .12s" },
+  dc:{ aspectRatio:"1",borderRadius:4,borderWidth:"1px",borderStyle:"solid",borderColor:"#21262d",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:1,padding:2,transition:"all .12s" },
   dcE:{ border:"none",background:"transparent",cursor:"default",aspectRatio:"1" },
   mc:{ background:"#0d1117",border:"1px solid #21262d",borderRadius:6,marginBottom:6,overflow:"hidden" },
   mh:{ padding:"5px 10px",background:"#161b22",display:"flex",justifyContent:"space-between",alignItems:"center" },
   fi:{ display:"grid",gridTemplateColumns:"1fr auto auto",gap:8,padding:"5px 10px",borderBottom:"1px solid #161b22",fontSize:12,alignItems:"center" },
   si:{ display:"grid",gridTemplateColumns:"20px 1fr auto auto",gap:6,padding:"5px 10px",borderBottom:"1px solid #161b22",cursor:"pointer",alignItems:"center",fontSize:12 },
-  cb:{ width:15,height:15,borderRadius:3,border:"1.5px solid #30363d",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,flexShrink:0 },
-  dz:{ border:"2px dashed #30363d",borderRadius:10,padding:"32px 20px",textAlign:"center",cursor:"pointer",transition:"all .2s" },
+  cb:{ width:15,height:15,borderRadius:3,borderWidth:"1.5px",borderStyle:"solid",borderColor:"#30363d",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,flexShrink:0 },
+  dz:{ borderWidth:"2px",borderStyle:"dashed",borderColor:"#30363d",borderRadius:10,padding:"32px 20px",textAlign:"center",cursor:"pointer",transition:"all .2s" },
 };
 
 export default function App() {
@@ -101,6 +220,8 @@ export default function App() {
   const [wtN, setWtN]     = useState("");
   const [showSup, setShowSup] = useState(true);
   const [manDay, setManDay]   = useState(null);
+  const [dowAct, setDowAct]   = useState(DEFAULT_DOW_ACT);
+  const [showCalCfg, setShowCalCfg] = useState(false);
   const [drag, setDrag]   = useState(false);
   const [notes, setNotes] = useState({});
   const [excl, setExcl]   = useState({});
@@ -112,31 +233,81 @@ export default function App() {
   const [priceModal, setPriceModal] = useState(false);
   const [pendingPriceDesc, setPendingPriceDesc] = useState("");
   const priceFileRef = useRef();
+  const mdFileRef = useRef();
   const openPriceQuickAdd = (foodName) => { setPendingPriceDesc(foodName); setView("prices"); setPriceModal(true); };
   const fileRef = useRef();
   const toggleExcl = k => setExcl(p=>{ const n={...p}; n[k]?delete n[k]:n[k]=true; return n; });
   const exclInRange = (from,to) => { const cur=new Date(from),res=[]; while(cur<=to){const d=dk(cur);if(excl[d])res.push(d);cur.setDate(cur.getDate()+1);} return res; };
 
-  // Load persisted data
+  // Load persisted data — Tauri: .md da disco; browser: JSON da localStorage
   useEffect(() => {
     (async () => {
-      const d  = await store.get("dm-diet");  if(d)  setDiet(d);
+      let dietLoaded = false;
+      // 1. Prova a caricare dal .md su disco (Tauri)
+      const mdFilename = await store.get("dm-diet-md-filename");
+      if (mdFilename) {
+        const mdText = await tauriReadMd(mdFilename);
+        if (mdText) {
+          try {
+            const parsed = markdownToDiet(mdText);
+            saveDiet(parsed, setDiet, setPlanS, setPlanE);
+            dietLoaded = true;
+          } catch { /* fallback sotto */ }
+        }
+      }
+      // 2. Prova a caricare da /piano.md nella cartella public/ (browser dev)
+      if (!dietLoaded) {
+        try {
+          const r = await fetch("/piano.md", { cache: "no-store" });
+          if (r.ok) {
+            const text = await r.text();
+            try {
+              // Caso A: MD generato dall'app → ha blocco <!-- diet-json -->
+              const parsed = markdownToDiet(text);
+              saveDiet(parsed, setDiet, setPlanS, setPlanE);
+              dietLoaded = true;
+            } catch {
+              // Caso B: MD scritto a mano → usa AI (richiede crediti API)
+              setLoading(true);
+              setLmsg("Analisi piano.md con AI — operazione una tantum...");
+              try {
+                const parsed = await callAI([
+                  {type:"text", text: DIET_AI_PROMPT + "\n\nContenuto:\n\n" + text}
+                ]);
+                saveDiet(parsed, setDiet, setPlanS, setPlanE);
+                dietLoaded = true;
+              } catch(aiErr) {
+                console.warn("AI parse fallita:", aiErr.message);
+              } finally { setLoading(false); }
+            }
+          }
+        } catch(fetchErr) { console.warn("Fetch piano.md fallita:", fetchErr.message); setLoading(false); }
+      }
+      // 3. Fallback JSON localStorage
+      if (!dietLoaded) {
+        const d = await store.get("dm-diet"); if(d) setDiet(d);
+      }
       const c  = await store.get("dm-cal");   if(c)  setCal(c);
       const w  = await store.get("dm-wts");   if(w)  setWts(w);
-      const p  = await store.get("dm-plan");  if(p)  { setPlanS(p.s||""); setPlanE(p.e||""); }
+      // Le date vengono già dal JSON del piano quando dietLoaded=true; leggo dm-plan solo come fallback
+      if (!dietLoaded) {
+        const p = await store.get("dm-plan"); if(p)  { setPlanS(p.s||""); setPlanE(p.e||""); }
+      }
       const n  = await store.get("dm-notes"); if(n)  setNotes(n);
-      const v  = await store.get("dm-view");  if(v&&d) setView(v);
+      const v  = await store.get("dm-view");  if(v)  setView(v);
       const pr = await store.get("dm-prices"); if(pr) setPrices(pr);
+      const da = await store.get("dm-dow-act"); if(da) setDowAct(da);
     })();
   }, []);
 
   useEffect(() => { if(diet) store.set("dm-diet", diet); }, [diet]);
   useEffect(() => { store.set("dm-cal",  cal);   }, [cal]);
   useEffect(() => { store.set("dm-wts",  wts);   }, [wts]);
-  useEffect(() => { store.set("dm-plan", {s:planS,e:planE}); }, [planS,planE]);
+  useEffect(() => { if(planS||planE) store.set("dm-plan", {s:planS,e:planE}); }, [planS,planE]);
   useEffect(() => { store.set("dm-notes",notes); }, [notes]);
   useEffect(() => { if(view!=="up") store.set("dm-view",view); }, [view]);
   useEffect(() => { store.set("dm-prices", prices); }, [prices]);
+  // dm-dow-act viene salvato esplicitamente al cambio (non via effect, evita race condition con startup useEffect)
 
   // Parse PDF with Claude AI
   const parsePDF = useCallback(async (file) => {
@@ -144,26 +315,11 @@ export default function App() {
     try {
       const b64 = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result.split(",")[1]); r.onerror=rej; r.readAsDataURL(file); });
       setLmsg("Analisi AI in corso — può richiedere 30-60 secondi...");
-      const resp = await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ model:MODEL, max_tokens:8000,
-          messages:[{role:"user",content:[
-            {type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},
-            {type:"text",text:`Analizza questo piano alimentare PDF. Restituisci SOLO JSON valido, nessun testo extra, nessun markdown.
-Struttura esatta:
-{"patient":{"name":"","weight":0,"targetWeight":0,"bmi":0,"bmr":0,"fat":0,"ffm":0},"period":{"startDate":"YYYY-MM-DD","checkupDate":"YYYY-MM-DD","checkupTime":"HH:MM"},"avgKcal":0,"macros":{"protein":0,"carbs":0,"fats":0},"days":[{"n":1,"activity":"","activityType":"tabata","kcal":0,"macros":{"prot":0,"carb":0,"fat":0},"meals":[{"name":"Colazione","icon":"☀️","foods":[{"name":"","qty":"","kcal":0,"isSupplement":false}]}],"condiments":{"olioG":0,"parmG":0},"supplements":[]}]}
-Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/barrette sportive; activityType: tabata=TABATA/cyclette, endurance=corsa endurance, rest=riposo, repetitions=ripetute, bike=bici/BDC, run=lungo run. Solo JSON.`}
-          ]}]
-        })
-      });
-      if(!resp.ok){ const t=await resp.text(); throw new Error(`API ${resp.status}: ${t.substring(0,120)}`); }
-      const data = await resp.json();
-      const txt = data.content?.find(c=>c.type==="text")?.text||"";
-      const clean = txt.replace(/```json\n?/g,"").replace(/```\n?/g,"").trim();
-      const parsed = JSON.parse(clean);
-      setDiet(parsed);
-      if(parsed.period?.startDate) setPlanS(parsed.period.startDate);
-      if(parsed.period?.checkupDate) setPlanE(parsed.period.checkupDate);
+      const parsed = await callAI([
+        {type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},
+        {type:"text",text:DIET_AI_PROMPT}
+      ]);
+      saveDiet(parsed, setDiet, setPlanS, setPlanE);
       setLmsg("✓ Piano caricato!");
       setTimeout(()=>{ setLoading(false); setView("ov"); },500);
     } catch(err){
@@ -173,20 +329,45 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
     }
   },[]);
 
-  // Generate calendar automatically
+  const importMD = useCallback(async (file) => {
+    setLoading(true); setLmsg("Lettura file Markdown...");
+    try {
+      const text = await file.text();
+      let parsed;
+      try {
+        parsed = markdownToDiet(text); // ha blocco diet-json → parsing istantaneo
+      } catch {
+        setLmsg("Analisi AI del Markdown — operazione una tantum...");
+        parsed = await callAI([{type:"text", text: DIET_AI_PROMPT + "\n\nContenuto:\n\n" + text}]);
+      }
+      saveDiet(parsed, setDiet, setPlanS, setPlanE);
+      setLmsg("✓ Piano caricato!");
+      setTimeout(()=>{ setLoading(false); setView("ov"); }, 500);
+    } catch(err) {
+      console.error(err);
+      setLmsg("❌ "+err.message);
+      setTimeout(()=>setLoading(false), 3000);
+    }
+  }, []);
+
+  // Generate calendar automatically — random shuffle + configurable day constraints
   const genCal = useCallback(()=>{
     if(!diet||!planS) return;
     const start=pd(planS), end=planE?pd(planE):new Date(pd(planS).getTime()+77*864e5);
-    const byType={}; diet.days?.forEach(d=>{ const t=d.activityType||"rest"; if(!byType[t]) byType[t]=[]; byType[t].push(d.n); });
+    const byType={};
+    diet.days?.forEach(d=>{ const t=d.activityType||"rest"; if(!byType[t]) byType[t]=[]; byType[t].push(d.n); });
+    // Fisher-Yates shuffle per ogni pool → assegnazione casuale
+    const shuffle = arr => { const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+    const pools={}; Object.entries(byType).forEach(([t,days])=>{ pools[t]=shuffle(days); });
     const nc={}, ri={}, cur=new Date(start);
     while(cur<=end){
-      const act=DOW_ACT[cur.getDay()]||"rest";
-      const pool=byType[act]||byType["rest"]||[];
+      const act=dowAct[cur.getDay()]||"rest";
+      const pool=pools[act]||pools["rest"]||[];
       if(pool.length){ nc[dk(cur)]=pool[(ri[act]||0)%pool.length]; ri[act]=(ri[act]||0)+1; }
       cur.setDate(cur.getDate()+1);
     }
     setCal(nc);
-  },[diet,planS,planE]);
+  },[diet,planS,planE,dowAct]);
 
   const dayFor = useCallback(d => { const gn=cal[dk(d)]; if(!gn||!diet) return null; return diet.days?.find(x=>x.n===gn)||null; },[cal,diet]);
 
@@ -202,16 +383,13 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
             if(!items[k]) items[k]={name:f.name,qty:f.qty,kcal:f.kcal||0,isSup:!!f.isSupplement,count:0};
             items[k].count++;
           }));
-          if(day.condiments?.olioG){
-            if(!items["__olio"]) items["__olio"]={name:"Olio EVO",qty:"",kcal:0,isSup:false,count:0,totalG:0};
-            items["__olio"].totalG=(items["__olio"].totalG||0)+day.condiments.olioG;
-            items["__olio"].qty=items["__olio"].totalG+"g tot."; items["__olio"].count++;
-          }
-          if(day.condiments?.parmG){
-            if(!items["__parm"]) items["__parm"]={name:"Parmigiano grattugiato",qty:"",kcal:0,isSup:false,count:0,totalG:0};
-            items["__parm"].totalG=(items["__parm"].totalG||0)+day.condiments.parmG;
-            items["__parm"].qty=items["__parm"].totalG+"g tot."; items["__parm"].count++;
-          }
+          if(day.condiments) Object.entries(day.condiments).forEach(([name,g])=>{
+            if(!g||typeof g!=="number") return;
+            const k="__cond_"+name.toLowerCase().replace(/[^a-z0-9]/g,"_");
+            if(!items[k]) items[k]={name,qty:"",kcal:0,isSup:false,count:0,totalG:0};
+            items[k].totalG=(items[k].totalG||0)+g;
+            items[k].qty=items[k].totalG+"g tot."; items[k].count++;
+          });
         }
       }
       cur.setDate(cur.getDate()+1);
@@ -240,7 +418,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
     const s=planS?pd(planS):new Date(), e=planE?pd(planE):new Date(s.getTime()+77*864e5); return[s,e];
   },[shopM,shopDt,planS,planE]);
 
-  const reset = ()=>{ setDiet(null);setCal({});setWts([]);setNotes({});setView("up"); ["dm-diet","dm-cal","dm-wts","dm-plan","dm-notes","dm-view"].forEach(k=>store.del(k)); };
+  const reset = ()=>{ setDiet(null);setCal({});setWts([]);setNotes({});setView("up");setDowAct(DEFAULT_DOW_ACT); ["dm-diet","dm-cal","dm-wts","dm-plan","dm-notes","dm-view","dm-dow-act"].forEach(k=>store.del(k)); };
 
   // ── LOADING ──
   if(loading) return (
@@ -278,6 +456,17 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
           <span style={{...S.muted,fontSize:12}}>Piano attivo: {diet.patient?.name}</span>
           <button style={S.btnG} onClick={()=>setView("ov")}>Apri →</button>
         </div>}
+        <div style={{marginTop:14,borderTop:"1px solid #21262d",paddingTop:14}}>
+          <div style={{fontSize:11,color:"#6e7681",marginBottom:8,textAlign:"left"}}>
+            Hai già esportato il piano in <strong style={{color:"#8b949e"}}>.md</strong>? Caricalo senza consumare token AI.
+          </div>
+          <button style={{...S.btnG,width:"100%",padding:"10px",fontSize:12,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}
+            onClick={()=>mdFileRef.current?.click()}>
+            📝 Importa Markdown (.md)
+          </button>
+          <input ref={mdFileRef} type="file" accept=".md,text/markdown" style={{display:"none"}}
+            onChange={e=>{const f=e.target.files?.[0];if(f)importMD(f);e.target.value="";}}/>
+        </div>
       </div>
       <div style={{...S.card,...S.cardP,fontSize:12,color:"#6e7681",lineHeight:1.7}}>
         <div style={{fontWeight:700,color:"#8b949e",marginBottom:6,fontSize:11}}>Funzionalità</div>
@@ -334,7 +523,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
         <div style={{...S.card,...S.cardP}}>
           <div style={S.cardT}>Giorni del Piano ({diet.days?.length})</div>
           <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-            {diet.days?.map(d=>{ const a=ACTS[d.activityType]||ACTS.rest; return (
+            {diet.days?.map(d=>{ const a=getAct(d.activityType); return (
               <div key={d.n} onClick={()=>setView("meals")} style={{background:a.bg,border:`1px solid ${a.c}44`,borderRadius:6,padding:"5px 8px",fontSize:11,cursor:"pointer",transition:"opacity .15s"}}>
                 <div style={{fontWeight:700,color:a.c}}>G.{d.n}</div>
                 <div style={{color:"#6e7681",fontSize:9}}>{d.activity?.substring(0,14)}</div>
@@ -351,7 +540,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
   const CalV = () => {
     const {y,m}=nav;
     const lastD=new Date(y,m+1,0).getDate();
-    const startDow=new Date(y,m,1).getDay();
+    const startDow=(new Date(y,m,1).getDay()+6)%7;
     const todayDk=dk(new Date()), selDk=dk(selDt);
     const selDay=dayFor(selDt), selAct=selDay?(ACTS[selDay.activityType]||ACTS.rest):null;
     return (
@@ -366,13 +555,40 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
             </div>
             <div style={S.row}>
               <button style={S.btn} onClick={genCal}>↻ Rigenera</button>
+              <button style={{...S.btnG,fontSize:12,...(showCalCfg?{borderColor:"#58a6ff",color:"#58a6ff"}:{})}} onClick={()=>setShowCalCfg(p=>!p)}>⚙️ Vincoli</button>
               {manDay&&<span style={{color:"#fb923c",fontWeight:700,fontSize:12,background:"rgba(251,146,60,.1)",border:"1px solid rgba(251,146,60,.3)",borderRadius:6,padding:"3px 8px"}}>G.{manDay} → clicca giorno <button style={{...S.btnG,padding:"0 5px",fontSize:10,marginLeft:4}} onClick={()=>setManDay(null)}>✕</button></span>}
             </div>
           </div>
+          {/* Pannello vincoli generazione */}
+          {showCalCfg&&<div style={{background:"#0d1117",borderRadius:6,padding:"10px 12px",marginBottom:10,border:"1px solid #30363d"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <span style={{fontSize:11,fontWeight:700,color:"#58a6ff",textTransform:"uppercase",letterSpacing:"0.07em"}}>⚙️ Vincoli — Attività per giorno</span>
+              <button style={{...S.btnG,fontSize:10,padding:"2px 7px"}} onClick={()=>{ setDowAct(DEFAULT_DOW_ACT); store.set("dm-dow-act",DEFAULT_DOW_ACT); }}>↺ Reset</button>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:"4px 16px"}}>
+              {DOW_LABELS.map(([dow,label])=>{
+                const cur=dowAct[dow]||"rest";
+                const curAct=getAct(cur);
+                return (
+                  <div key={dow} style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:11,color:"#8b949e",width:68,flexShrink:0,fontWeight:600}}>{label}</span>
+                    <select value={cur} onChange={e=>{ const nd={...dowAct,[dow]:e.target.value}; setDowAct(nd); store.set("dm-dow-act",nd); }}
+                      style={{...S.inp,padding:"3px 6px",fontSize:11,flex:1,minWidth:0,color:curAct.c,background:"#161b22"}}>
+                      {Object.entries(ACTS).map(([k,a])=>{
+                        const pool=diet?.days?.filter(d=>d.activityType===k)||[];
+                        return <option key={k} value={k} style={{color:"#c9d1d9",background:"#161b22"}}>{a.label}{pool.length?` (G.${pool.map(d=>d.n).join(",")})`:""}</option>;
+                      })}
+                    </select>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{marginTop:8,fontSize:10,color:"#6e7681"}}>I giorni con un solo giorno disponibile (es. Lungo BDC, Lungo RUN) vengono sempre assegnati. La generazione è casuale: ogni click su Rigenera produce un piano diverso.</div>
+          </div>}
           {/* Assign buttons */}
           <div style={{display:"flex",gap:3,flexWrap:"wrap",marginBottom:10}}>
             <span style={{...S.muted,fontSize:10,alignSelf:"center"}}>Assegna manualmente:</span>
-            {diet?.days?.map(d=>{ const a=ACTS[d.activityType]||ACTS.rest; return (
+            {diet?.days?.map(d=>{ const a=getAct(d.activityType); return (
               <button key={d.n} onClick={()=>setManDay(manDay===d.n?null:d.n)} style={{background:manDay===d.n?a.c:a.bg,border:`1px solid ${a.c}66`,borderRadius:4,padding:"2px 7px",fontSize:10,fontWeight:700,color:manDay===d.n?"#0d1117":a.c,cursor:"pointer"}}>G.{d.n}</button>
             );})}
             <button style={{...S.btnG,fontSize:10,padding:"2px 7px",marginLeft:"auto",color:"#f85149",borderColor:"rgba(248,81,73,.3)"}} onClick={()=>setCal({})}>🗑</button>
@@ -384,7 +600,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
             {Array(lastD).fill(null).map((_,i)=>{
               const date=new Date(y,m,i+1), dKey=dk(date);
               const gn=cal[dKey], dayD=gn?diet?.days?.find(x=>x.n===gn):null;
-              const a=dayD?(ACTS[dayD.activityType]||ACTS.rest):null;
+              const a=dayD?(getAct(dayD.activityType)):null;
               const isT=dKey===todayDk, isS=dKey===selDk;
               const isCtrl=planE&&dKey===planE;
               return <div key={i} onClick={()=>{ setSelDt(date); if(manDay!==null){setCal(p=>({...p,[dKey]:manDay}));setManDay(null);} }}
@@ -434,7 +650,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
   const MealsV = () => {
     const [ld,setLd]=useState(dk(selDt));
     const date=pd(ld), day=dayFor(date);
-    const act=day?(ACTS[day.activityType]||ACTS.rest):null;
+    const act=day?(getAct(day.activityType)):null;
     return (
       <div>
         <div style={{...S.card,...S.cardP}}>
@@ -444,6 +660,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
               <div style={{background:act?.bg,border:`1px solid ${act?.c}44`,borderRadius:6,padding:"4px 9px",fontSize:11,fontWeight:700,color:act?.c}}>G.{day.n} · {day.activity}</div>
               <span style={{...S.muted,fontSize:11}}>⚡ {day.kcal} kcal</span>
             </div>}
+            <button style={{...S.btnG,marginLeft:"auto",fontSize:11,padding:"4px 10px"}} onClick={()=>setView("shop")}>🛒 Spesa →</button>
           </div>
         </div>
         {!day&&<div style={{...S.card,...S.cardP,textAlign:"center",color:"#6e7681"}}>Nessun piano assegnato. <button style={{...S.btnG,marginLeft:8}} onClick={()=>setView("cal")}>Vai al Calendario →</button></div>}
@@ -454,23 +671,25 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
               <div style={{fontWeight:700,fontSize:12}}>{meal.icon} {meal.name}</div>
               <div style={{fontSize:11,color:"#6e7681",background:"#21262d",borderRadius:10,padding:"1px 7px"}}>{mk} kcal</div>
             </div>
-            {meal.foods?.map((f,fi)=>(
+            {meal.foods?.map((f,fi)=>{ const sUrl=f.isSupplement?getSupplementUrl(f.name):null; return (
               <div key={fi} style={{...S.fi,background:f.isSupplement?"rgba(88,166,255,.04)":"transparent"}}>
-                <div style={{color:f.isSupplement?"#58a6ff":"#c9d1d9"}}>
-                  {f.isSupplement&&<span style={{fontSize:8,background:"rgba(31,111,235,.2)",color:"#58a6ff",borderRadius:3,padding:"1px 4px",marginRight:4,fontWeight:700}}>SPORT</span>}
+                <div style={{color:f.isSupplement?"#58a6ff":"#c9d1d9",display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
+                  {f.isSupplement&&<span style={{fontSize:8,background:"rgba(31,111,235,.2)",color:"#58a6ff",borderRadius:3,padding:"1px 4px",fontWeight:700}}>SPORT</span>}
                   {f.name}
+                  {sUrl&&<a href={sUrl} target="_blank" rel="noopener noreferrer" style={{fontSize:9,color:"#58a6ff",textDecoration:"none",background:"rgba(31,111,235,.15)",borderRadius:3,padding:"1px 5px"}} title="Acquista prodotto">🔗</a>}
                 </div>
                 <div style={{color:"#d29922",fontWeight:600,fontSize:11}}>{f.qty}</div>
                 <div style={{color:"#6e7681",fontSize:10}}>{f.kcal>0?f.kcal+" kc":""}</div>
               </div>
-            ))}
+            );})}
           </div>;
         })}
-        {day?.condiments&&(day.condiments.olioG>0||day.condiments.parmG>0)&&(
+        {day?.condiments&&Object.keys(day.condiments).length>0&&(
           <div style={S.mc}>
             <div style={S.mh}><div style={{fontWeight:700,fontSize:12}}>🫙 Condimenti</div></div>
-            {day.condiments.olioG>0&&<div style={S.fi}><div>Olio EVO</div><div style={{color:"#d29922",fontWeight:600,fontSize:11}}>{day.condiments.olioG}g</div><div style={{...S.muted,fontSize:10}}>{(day.condiments.olioG*9).toFixed(0)} kc</div></div>}
-            {day.condiments.parmG>0&&<div style={S.fi}><div>Parmigiano grattugiato</div><div style={{color:"#d29922",fontWeight:600,fontSize:11}}>{day.condiments.parmG}g</div><div style={{...S.muted,fontSize:10}}>{(day.condiments.parmG*3.92).toFixed(0)} kc</div></div>}
+            {Object.entries(day.condiments).filter(([,g])=>g>0).map(([name,g])=>(
+              <div key={name} style={S.fi}><div>{name}</div><div style={{color:"#d29922",fontWeight:600,fontSize:11}}>{g}g</div><div/></div>
+            ))}
           </div>
         )}
         {day?.macros&&<div style={{...S.card,...S.cardP}}>
@@ -521,7 +740,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
     const DayPill = ({date}) => {
       const dKey=dk(date);
       const day=dayFor(date);
-      const act=day?(ACTS[day.activityType]||ACTS.rest):null;
+      const act=day?(getAct(day.activityType)):null;
       const isEx=!!excl[dKey];
       const dow=["D","L","M","M","G","V","S"][date.getDay()];
       return (
@@ -550,6 +769,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
             ))}
             {shopM!=="plan"&&<input type="date" style={{...S.inp,marginLeft:"auto"}} value={shopDt} onChange={e=>setShopDt(e.target.value)}/>}
             <button style={{...S.btnG,...(showSup?{borderColor:"#238636",color:"#2ea043"}:{})}} onClick={()=>setShowSup(p=>!p)}>{showSup?"👁 Tutti":"👁 Solo cibo"}</button>
+            <button style={{...S.btnG,fontSize:11,padding:"4px 10px"}} onClick={()=>setView("meals")}>← 🍽 Pasti</button>
           </div>
 
           {/* Esclusione giorni — settimana */}
@@ -634,14 +854,16 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
 
         {showSup&&supp.length>0&&<div style={S.card}>
           <div style={{...S.cardH,background:"rgba(88,166,255,.06)"}}><span style={{color:"#58a6ff"}}>⚡ Integratori ({supp.length}) — Non al Conad</span></div>
-          {supp.map(item=>(
-            <div key={item.name} onClick={()=>tog(item.name)} style={{...S.si,background:"rgba(88,166,255,.03)",...(chk[item.name]?{opacity:.6}:{})}}>
-              <div style={{...S.cb,...(chk[item.name]?{background:"#238636",borderColor:"#238636",color:"#fff"}:{})}}>✓</div>
-              <div style={{color:"#58a6ff",...(chk[item.name]?{textDecoration:"line-through",color:"#6e7681"}:{})}}>{item.name}{item.count>1&&<span style={{...S.muted,fontSize:10,marginLeft:4}}>×{item.count}</span>}</div>
+          {supp.map(item=>{ const sUrl=getSupplementUrl(item.name); return (
+            <div key={item.name} style={{...S.si,background:"rgba(88,166,255,.03)",...(chk[item.name]?{opacity:.6}:{}),gridTemplateColumns:"20px 1fr auto auto auto"}}>
+              <div onClick={()=>tog(item.name)} style={{...S.cb,...(chk[item.name]?{background:"#238636",borderColor:"#238636",color:"#fff"}:{}),cursor:"pointer"}}>✓</div>
+              <div onClick={()=>tog(item.name)} style={{color:"#58a6ff",...(chk[item.name]?{textDecoration:"line-through",color:"#6e7681"}:{}),cursor:"pointer"}}>{item.name}{item.count>1&&<span style={{...S.muted,fontSize:10,marginLeft:4}}>×{item.count}</span>}</div>
               <div style={{color:"#d29922",fontWeight:600,fontSize:11}}>{item.qty}</div>
-              <div style={{...S.muted,fontSize:10}}>amazon/farmacia</div>
+              <div style={{...S.muted,fontSize:10}}>{sUrl?"":"amazon/farmacia"}</div>
+              {sUrl?<a href={sUrl} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()} style={{fontSize:10,color:"#58a6ff",textDecoration:"none",background:"rgba(31,111,235,.2)",borderRadius:4,padding:"2px 7px",fontWeight:600,whiteSpace:"nowrap"}}>🔗 Acquista</a>:<div/>}
             </div>
-          ))}
+          );})}
+
         </div>}
         {visible.length===0&&<div style={{...S.card,...S.cardP,textAlign:"center",color:"#6e7681",fontSize:12}}>
           {exclCount>0&&exclCount===rangeDays.length?"Tutti i giorni sono esclusi — clicca i pill sopra per includerli.":"Nessun ingrediente. Genera il calendario prima e seleziona un periodo valido."}
@@ -715,9 +937,15 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
           <div style={{...S.cardT,color:"#58a6ff"}}>⚡ Integratori nel Piano</div>
           <div style={{...S.muted,fontSize:11,marginBottom:10}}>Non disponibili al Conad — acquisto online (amazon.it, decathlon.it) o in farmacia</div>
           {sl.length===0&&<div style={{...S.muted,fontSize:12}}>Nessun integratore trovato. L'AI marca come SPORT: proteine in polvere, gel, barrette energetiche sportive, creatina.</div>}
-          {sl.map(s=>{ const uses=Object.entries(cal).filter(([,gn])=>s.days.includes(gn)).length; return (
+          {sl.map(s=>{ const uses=Object.entries(cal).filter(([,gn])=>s.days.includes(gn)).length; const sUrl=getSupplementUrl(s.name); return (
             <div key={s.name} style={{...S.mc,marginBottom:8}}>
-              <div style={{...S.mh,background:"rgba(88,166,255,.07)"}}><span style={{color:"#58a6ff",fontWeight:700,fontSize:12}}>{s.name}</span><span style={{...S.muted,fontSize:10}}>Dose: {s.qty} · G.{s.days.join(", G.")}</span></div>
+              <div style={{...S.mh,background:"rgba(88,166,255,.07)"}}>
+                <span style={{color:"#58a6ff",fontWeight:700,fontSize:12,display:"flex",alignItems:"center",gap:6}}>
+                  {s.name}
+                  {sUrl&&<a href={sUrl} target="_blank" rel="noopener noreferrer" style={{fontSize:10,color:"#58a6ff",textDecoration:"none",background:"rgba(31,111,235,.2)",borderRadius:4,padding:"1px 7px",fontWeight:600}}>🔗 Acquista</a>}
+                </span>
+                <span style={{...S.muted,fontSize:10}}>Dose: {s.qty} · G.{s.days.join(", G.")}</span>
+              </div>
               <div style={{...S.cardP,display:"flex",gap:6}}>
                 {[["Giorni piano",s.days.length,"#58a6ff"],["Usi nel periodo",uses,"#2ea043"],["Dose/uso",s.qty,"#d29922"]].map(([l,v,c])=>(
                   <div key={l} style={S.sb}><div style={{...S.sbN,color:c,fontSize:13}}>{v}</div><div style={S.sbL}>{l}</div></div>
@@ -731,7 +959,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
           <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
             {weekDays.map(d=>{ const day=dayFor(d); const supps=day?.meals?.flatMap(m=>m.foods?.filter(f=>f.isSupplement)||[])||[]; const isT=dk(d)===dk(today); return (
               <div key={dk(d)} style={{flex:1,minWidth:75,background:isT?"rgba(210,153,34,.07)":"#161b22",border:`1px solid ${isT?"#d29922":"#21262d"}`,borderRadius:6,padding:"6px 7px"}}>
-                <div style={{fontSize:10,fontWeight:700,color:isT?"#d29922":"#6e7681",marginBottom:3}}>{["Dom","Lun","Mar","Mer","Gio","Ven","Sab"][d.getDay()]} {d.getDate()}{day&&<span style={{color:ACTS[day.activityType]?.c||"#6e7681",marginLeft:2,fontSize:8}}>G.{day.n}</span>}</div>
+                <div style={{fontSize:10,fontWeight:700,color:isT?"#d29922":"#6e7681",marginBottom:3}}>{["Dom","Lun","Mar","Mer","Gio","Ven","Sab"][d.getDay()]} {d.getDate()}{day&&<span style={{color:getAct(day.activityType).c,marginLeft:2,fontSize:8}}>G.{day.n}</span>}</div>
                 {supps.length===0?<div style={{fontSize:9,color:"#6e7681"}}>—</div>:supps.map(s=><div key={s.name} style={{fontSize:9,color:"#58a6ff",marginBottom:1,lineHeight:1.3}}>{s.name.substring(0,16)}<br/><span style={{color:"#d29922"}}>{s.qty}</span></div>)}
               </div>
             );})}
@@ -870,13 +1098,29 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
 
   // Modale per aggiunta nuovo prodotto
   const PriceAddModal = ({initialDesc,onSave,onCancel}) => {
+    const findIva = (pianoVal) => {
+      if(!pianoVal?.trim()) return null;
+      const n=norm(pianoVal);
+      let m=prices.prodotti.find(p=>p.nomePiano&&norm(p.nomePiano)===n);
+      if(!m) m=prices.prodotti.find(p=>p.nomePiano&&(n.includes(norm(p.nomePiano))||norm(p.nomePiano).includes(n)));
+      return m?.iva||null;
+    };
     const [desc,setDesc]=useState(initialDesc||"");
     const [piano,setPiano]=useState(initialDesc||"");
     const [prezzo,setPrezzo]=useState("");
     const [unita,setUnita]=useState("pezzo");
-    const [iva,setIva]=useState("A");
     const [cat,setCat]=useState("altro");
     const [note,setNote]=useState("");
+    const [ivaAuto,setIvaAuto]=useState(()=>!!findIva(initialDesc));
+    const [iva,setIva]=useState(()=>findIva(initialDesc)||"A");
+
+    const handlePianoChange = (val) => {
+      setPiano(val);
+      const found=findIva(val);
+      if(found){ setIva(found); setIvaAuto(true); }
+      else setIvaAuto(false);
+    };
+
     return (
       <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:14}} onClick={e=>{if(e.target===e.currentTarget)onCancel();}}>
         <div style={{background:"#161b22",border:"1px solid #30363d",borderRadius:10,padding:18,maxWidth:380,width:"100%"}}>
@@ -884,7 +1128,7 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
           <label style={S.lbl}>Descrizione scontrino *</label>
           <input style={{...S.inp,width:"100%",marginBottom:8}} value={desc} onChange={e=>setDesc(e.target.value)} placeholder="es. ZUCCHINE SCURE"/>
           <label style={S.lbl}>Nome nel piano (opzionale)</label>
-          <input style={{...S.inp,width:"100%",marginBottom:8}} value={piano} onChange={e=>setPiano(e.target.value)} placeholder="lascia vuoto se non presente nel piano"/>
+          <input style={{...S.inp,width:"100%",marginBottom:8}} value={piano} onChange={e=>handlePianoChange(e.target.value)} placeholder="lascia vuoto se non presente nel piano"/>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
             <div><label style={S.lbl}>Prezzo (€) *</label><input style={{...S.inp,width:"100%"}} type="number" step="0.01" value={prezzo} onChange={e=>setPrezzo(e.target.value)}/></div>
             <div><label style={S.lbl}>Unità</label>
@@ -899,9 +1143,14 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
                 {Object.keys(CAT_PRICE_LABELS).map(c=><option key={c} value={c}>{CAT_PRICE_LABELS[c]}</option>)}
               </select>
             </div>
-            <div><label style={S.lbl}>IVA</label>
-              <select style={{...S.inp,width:"100%"}} value={iva} onChange={e=>setIva(e.target.value)}>
-                <option value="A">A — 4%</option><option value="B">B — 5%</option><option value="C">C — 10%</option><option value="D">D — 22%</option>
+            <div>
+              <label style={{...S.lbl,display:"flex",alignItems:"center",gap:5}}>
+                IVA
+                {ivaAuto&&<span style={{fontSize:9,fontWeight:700,background:"rgba(46,160,67,.18)",color:"#2ea043",borderRadius:4,padding:"1px 5px",letterSpacing:"0.04em"}}>AUTO</span>}
+              </label>
+              <select style={{...S.inp,width:"100%",...(ivaAuto?{borderColor:"rgba(46,160,67,.5)"}:{})}} value={iva}
+                onChange={e=>{ setIva(e.target.value); setIvaAuto(false); }}>
+                {Object.keys(prices.ivaAliquote).map(i=><option key={i} value={i}>{i} — {prices.ivaAliquote[i]}%</option>)}
               </select>
             </div>
           </div>
@@ -930,6 +1179,14 @@ Regole: estrai tutti i giorni; isSupplement=true per whey/proteine/creatina/gel/
             </button>
           ))}
           <button style={{...S.btnG,padding:"4px 10px",fontSize:12}} onClick={()=>setView("up")}>+ PDF</button>
+          {diet&&<button style={{...S.btnG,padding:"4px 10px",fontSize:12}} onClick={()=>{
+            const md=dietToMarkdown(diet);
+            const blob=new Blob([md],{type:"text/markdown"});
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement("a");
+            a.href=url; a.download=`piano_${(diet.patient?.name||"dieta").replace(/\s+/g,"_").toLowerCase()}.md`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+          }}>💾 .md</button>}
         </div>
       </div>
       <div style={S.body}>

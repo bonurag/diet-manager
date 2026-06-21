@@ -1,0 +1,1379 @@
+{
+  "negozio": "Conad",
+  "ultimoAggiornamento": "2026-05-31",
+  "fonti": [
+    {
+      "data": "2026-05-31",
+      "ora": "11:47",
+      "documento": "DOC.0263-0005",
+      "totale": 155.9
+    },
+    {
+      "data": "non specificata",
+      "documento": "scontrino 2",
+      "totale": 134.91
+    }
+  ],
+  "ivaAliquote": {
+    "A": 4.0,
+    "B": 5.0,
+    "C": 10.0,
+    "D": 22.0
+  },
+  "legendaIva": {
+    "A": "Aliquota 4% — alimentari di base (frutta, verdura, pane, latte, pasta)",
+    "B": "Aliquota 5% — non osservata in questi scontrini",
+    "C": "Aliquota 10% — alimentari trasformati/conservati",
+    "D": "Aliquota 22% — bevande gassate/zuccherate, prodotti non alimentari"
+  },
+  "prodotti": [
+    {
+      "id": "zucchine",
+      "descrizione": "ZUCCHINE SCURE",
+      "nomePiano": "Zucchine",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "prezzo": 2.36,
+      "unita": "acquisto",
+      "iva": "A",
+      "occorrenze": [
+        2.41,
+        2.31
+      ],
+      "note": "Prezzo variabile in base al peso pesato in cassa. Media tra 2 acquisti.",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "carote",
+      "descrizione": "CAROTE",
+      "nomePiano": "Carote",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "prezzo": 1.11,
+      "unita": "acquisto",
+      "iva": "A",
+      "occorrenze": [
+        1.53,
+        0.68
+      ],
+      "note": "Prezzo variabile in base al peso. Forte variazione tra i 2 acquisti (peso diverso).",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "pomodori",
+      "descrizione": "POMODORO GRAPPOLO",
+      "nomePiano": "Pomodori freschi",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "prezzo": 2.11,
+      "unita": "acquisto",
+      "iva": "A",
+      "occorrenze": [
+        2.11
+      ],
+      "note": "Pomodoro a grappolo",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "mele",
+      "descrizione": "MELE GRANNY 75-80",
+      "nomePiano": "Mele",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "prezzo": 1.99,
+      "unita": "acquisto",
+      "iva": "A",
+      "occorrenze": [
+        1.99,
+        1.99
+      ],
+      "note": "Varietà Granny Smith calibro 75-80",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "pesche",
+      "descrizione": "PESCHE NOCI",
+      "nomePiano": "Pesche",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "prezzo": 3.74,
+      "unita": "acquisto",
+      "iva": "A",
+      "occorrenze": [
+        3.49,
+        3.98
+      ],
+      "note": "Pesche noci",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "kiwi",
+      "descrizione": "KIWI ESTERI / HAYWARD",
+      "nomePiano": "Kiwi",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "prezzo": 1.51,
+      "unita": "acquisto",
+      "iva": "A",
+      "occorrenze": [
+        2.43,
+        0.58
+      ],
+      "note": "Forte variazione: probabilmente quantità diverse acquistate",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "albicocche",
+      "descrizione": "ALBICOCCHE",
+      "nomePiano": "Albicocche",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "prezzo": 1.0,
+      "unita": "acquisto",
+      "iva": "A",
+      "occorrenze": [
+        1.0
+      ],
+      "note": "",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "prugne",
+      "descrizione": "SUSINE ROSSE",
+      "nomePiano": "Prugne / susine",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "prezzo": 1.21,
+      "unita": "acquisto",
+      "iva": "A",
+      "occorrenze": [
+        1.44,
+        0.97
+      ],
+      "note": "",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "banana",
+      "descrizione": "BANANE CPQ",
+      "nomePiano": "Banane",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "prezzo": 1.1,
+      "unita": "acquisto",
+      "iva": "A",
+      "occorrenze": [
+        1.1
+      ],
+      "note": "cpq = confezione pre-pesata",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "patate",
+      "descrizione": "PATATE",
+      "nomePiano": "Patate",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "peso_variabile",
+      "prezzo": 1.09,
+      "unita": "acquisto",
+      "iva": "A",
+      "occorrenze": [
+        1.09
+      ],
+      "note": "",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "rucola",
+      "descrizione": "RUCOLA cpq 70-125gr",
+      "nomePiano": "Rucola",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "confezione",
+      "prezzo": 0.89,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        1.39,
+        0.89,
+        0.89
+      ],
+      "note": "Formato 70gr a 0.89€, formato 125gr a 1.39€. Prezzo di riferimento: 70gr.",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "lattuga_iceberg",
+      "descrizione": "ICEBERG JULIENNE 500",
+      "nomePiano": "Lattuga iceberg",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "confezione",
+      "prezzo": 2.49,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        2.49
+      ],
+      "note": "Busta 500g già tagliata julienne",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "valerianella",
+      "descrizione": "VALERIANA cpq 125gr",
+      "nomePiano": "Valerianella",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.49,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        1.49
+      ],
+      "note": "Confezione 125g",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "spinaci",
+      "descrizione": "SPINACI SOFFICI / FOGLIA VERDE",
+      "nomePiano": "Spinaci al vapore",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.99,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        1.99,
+        1.99
+      ],
+      "note": "Surgelati, busta singola",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "fagiolini",
+      "descrizione": "FAGIOLINI E PATATE B",
+      "nomePiano": "Fagiolini",
+      "categoria": "frutta_verdura",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.39,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        2.19
+      ],
+      "note": "Prezzo netto dopo sconto -0.80 (2.19-0.80=1.39). Surgelati misti fagiolini+patate.",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "noci",
+      "descrizione": "NOCI SGUSC.CONAD CAL",
+      "nomePiano": "Noci",
+      "categoria": "frutta_secca",
+      "tipoPrezzo": "confezione",
+      "prezzo": 5.25,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        5.25
+      ],
+      "note": "Formato grande, calibrate, sgusciate",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "actimel",
+      "descrizione": "ACTIMEL IMMUNO PLUS / ACTIMEL+ FRAGOLA",
+      "nomePiano": "Yogurt con fermenti (Actimel)",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "prezzo": 3.59,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        3.59,
+        3.59
+      ],
+      "note": "Confezione multipack (8 flaconcini circa)",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "fiocchi_latte",
+      "descrizione": "FIOCCHI DI LATTE PIA",
+      "nomePiano": "Fiocchi di latte",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.35,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        1.35
+      ],
+      "note": "Prezzo netto con promo 2x1 (pagato 1 su 2 acquistati)",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "yogurt_total0",
+      "descrizione": "YOG.TOT 0% BIANCO",
+      "nomePiano": "Yogurt scremato bianco / Yogurt greco scr. bianco",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "prezzo": 2.72,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        3.89,
+        1.55
+      ],
+      "note": "Formato grande 3.89€, formato singolo 1.55€",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "mozzarella_proteica",
+      "descrizione": "MOZZARELLA PROTEICA",
+      "nomePiano": "Mozzarella proteica (Granarolo Benessere)",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.39,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        1.39,
+        1.39
+      ],
+      "note": "Prezzo costante in entrambi gli scontrini",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "philadelphia_yog",
+      "descrizione": "PHILADELPHIA C/YOGURT",
+      "nomePiano": "Philadelphia (variante)",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.79,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        2.09
+      ],
+      "note": "Prezzo netto dopo sconto -0.30",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "philadelphia_no_lattosio",
+      "descrizione": "PHILADELPHIA SENZA LATTOSIO",
+      "nomePiano": "Philadelphia (variante senza lattosio)",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.79,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        2.35
+      ],
+      "note": "Prezzo netto dopo sconto -0.56",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "philadelphia_protein",
+      "descrizione": "PHILADELPHIA PROTEIN",
+      "nomePiano": "Philadelphia Protein",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "prezzo": 3.58,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        4.3
+      ],
+      "note": "MATCH ESATTO col piano. Prezzo netto dopo sconto -0.72 (4.30-0.72=3.58)",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "latte_ps",
+      "descrizione": "LAT.UHT PS AD C.LR B",
+      "nomePiano": "Latte parzialmente scremato",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.19,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        1.19,
+        1.19
+      ],
+      "note": "Prezzo costante in entrambi gli scontrini. Probabile formato 1L.",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "ricotta_light",
+      "descrizione": "RICOTTA LIGHT PIACERI",
+      "nomePiano": "Ricotta light",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.29,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        2.58
+      ],
+      "note": "Prezzo netto con promo 2x1 (2.58-1.29=1.29)",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "hipro_drink",
+      "descrizione": "HIPRO DRINK VANIGLIA/STRACCIATELLA",
+      "nomePiano": "High Protein Drink (sostituto Ehrmann)",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.74,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        1.49,
+        2.19
+      ],
+      "note": "Marca Hipro al posto di Ehrmann citato nel piano. Prezzo netto dopo sconto fornitore.",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "hipro_mirtillo",
+      "descrizione": "HIPRO MIRTILLO 160g",
+      "nomePiano": "Dessert proteico (variante mirtillo)",
+      "categoria": "latticini",
+      "tipoPrezzo": "confezione",
+      "prezzo": 0.99,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        1.49
+      ],
+      "note": "Prezzo netto dopo sconto -0.50",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "salmone_affumicato",
+      "descrizione": "SALMONE AFF.CONVENIENZA",
+      "nomePiano": "Salmone affumicato",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "prezzo": 6.99,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        9.69
+      ],
+      "note": "Prezzo netto dopo sconto -2.70 (9.69-2.70=6.99)",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "hamburger_manzo",
+      "descrizione": "HAMBURGER SCOTTONA S",
+      "nomePiano": "Hamburger di manzo",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "prezzo": 4.4,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        4.4
+      ],
+      "note": "Carne di scottona",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "pollo_petto",
+      "descrizione": "PETTO DI POLLO A FETTE",
+      "nomePiano": "Petto di pollo",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "prezzo": 3.15,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        3.15
+      ],
+      "note": "Vassoio a fette, banco macelleria",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "salmone_filetti",
+      "descrizione": "SALMONE FETTE NORVEGESE / FILETTO FRESCO",
+      "nomePiano": "Salmone (filetti)",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "prezzo": 3.27,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        3.29,
+        3.25
+      ],
+      "note": "Filetti freschi norvegesi",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "orata_filetti",
+      "descrizione": "FILETTI DI ORATA EST",
+      "nomePiano": "Orata (filetti)",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "prezzo": 4.69,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        4.69
+      ],
+      "note": "MATCH ESATTO col piano",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "manzo_inglese",
+      "descrizione": "MANZO ALL'INGLESE",
+      "nomePiano": "Manzo magro (fesa/roast beef)",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "prezzo": 3.84,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        3.65,
+        4.02
+      ],
+      "note": "Roast beef pronto - molto simile al \"manzo magro\" del piano",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "tonno_naturale",
+      "descrizione": "TONNO VERONATURALE M",
+      "nomePiano": "Tonno al naturale",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "prezzo": 5.39,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        8.69
+      ],
+      "note": "MATCH ESATTO col piano. Confezione multipack, prezzo netto dopo sconto -3.30",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "merluzzo_gratin",
+      "descrizione": "FIL.MERL.GRAT.MELANZANE/ERBE",
+      "nomePiano": "Filetti merluzzo gratin patate Findus",
+      "categoria": "carne_pesce",
+      "tipoPrezzo": "confezione",
+      "prezzo": 2.99,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        5.99,
+        5.99
+      ],
+      "note": "Varianti diverse da quella citata nel piano (patate+rosmarino) ma stesso tipo di prodotto surgelato. Prezzo netto dopo sconto -3.00 cad.",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "pane_tramezzino",
+      "descrizione": "PANE PER TRAMEZZINO",
+      "nomePiano": "Pane a fette / pane integrale",
+      "categoria": "cereali_pane",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.59,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        1.59
+      ],
+      "note": "Non integrale - verificare se necessaria versione integrale",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "pane_forno",
+      "descrizione": "FORNO TRADIZIONALE (pane)",
+      "nomePiano": "Pane integrale fresco / Pane di frumento",
+      "categoria": "cereali_pane",
+      "tipoPrezzo": "peso_variabile",
+      "prezzo": 0.87,
+      "unita": "acquisto",
+      "iva": "C",
+      "occorrenze": [
+        1.11,
+        0.64,
+        0.85
+      ],
+      "note": "Banco forno, peso variabile in base al pezzo scelto",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "riso_carnaroli",
+      "descrizione": "RISO CARNAROLI CURTI",
+      "nomePiano": "Riso (generico)",
+      "categoria": "cereali_pane",
+      "tipoPrezzo": "confezione",
+      "prezzo": 4.79,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        4.79
+      ],
+      "note": "Riso Carnaroli premium - più caro del riso standard del piano",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "riso_gallo",
+      "descrizione": "RISO GALLO BLONDXINS",
+      "nomePiano": "Riso integrale (possibile)",
+      "categoria": "cereali_pane",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.89,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        3.15
+      ],
+      "note": "Prezzo netto dopo sconto -1.26. Verificare se integrale o bianco.",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "biscotti_saiwa",
+      "descrizione": "BISC.SAIWA ORO 5 CEREALI",
+      "nomePiano": "Biscotti secchi integrali (sostituto)",
+      "categoria": "cereali_pane",
+      "tipoPrezzo": "confezione",
+      "prezzo": 2.29,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        2.29
+      ],
+      "note": "Non sono biscotti integrali puri - 5 cereali misti",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "ceci_vaso",
+      "descrizione": "CECI VASO VETRO CONAD",
+      "nomePiano": "Ceci in scatola",
+      "categoria": "legumi_conserve",
+      "tipoPrezzo": "confezione",
+      "prezzo": 0.89,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        1.78
+      ],
+      "note": "Prezzo per singolo vaso (1.78 era per 2 pezzi)",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "passata_pomodoro",
+      "descrizione": "PASSATA POM.BIO VERS",
+      "nomePiano": "Pomodori (passata)",
+      "categoria": "legumi_conserve",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.0,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        1.45
+      ],
+      "note": "Prezzo netto dopo sconto -0.45",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "pelati",
+      "descrizione": "PELATI CIRIO",
+      "nomePiano": "Pomodori pelati",
+      "categoria": "legumi_conserve",
+      "tipoPrezzo": "confezione",
+      "prezzo": 0.99,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        1.29
+      ],
+      "note": "Prezzo netto dopo sconto -0.30",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "ragu_carne",
+      "descrizione": "RAGU STAR CARNE LATTE",
+      "nomePiano": "Ragù di carne fresco",
+      "categoria": "legumi_conserve",
+      "tipoPrezzo": "confezione",
+      "prezzo": 2.23,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        2.99
+      ],
+      "note": "Ragù pronto in vasetto, non fresco da banco come nel piano. Prezzo netto dopo sconto -0.76",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "olive_verdi",
+      "descrizione": "OLIVE VERDI DEN.CONAD",
+      "nomePiano": "Olive verdi",
+      "categoria": "condimenti",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.59,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        4.77
+      ],
+      "note": "Prezzo per singolo vasetto (4.77 era per 3 pezzi)",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "miele",
+      "descrizione": "MIELE AMBROSOLI MILLEFIORI",
+      "nomePiano": "Miele",
+      "categoria": "condimenti",
+      "tipoPrezzo": "confezione",
+      "prezzo": 3.85,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        3.85
+      ],
+      "note": "",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "ketchup",
+      "descrizione": "KETCHUP MULTIPACK CONAD",
+      "nomePiano": "Salsa ketchup",
+      "categoria": "condimenti",
+      "tipoPrezzo": "confezione",
+      "prezzo": 0.99,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        0.99
+      ],
+      "note": "",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "cioccolato_85",
+      "descrizione": "TAV.EXCELL.85%CACAO",
+      "nomePiano": "Cioccolato fondente 80% (variante 85%)",
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "prezzo": 3.29,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        3.69
+      ],
+      "note": "85% invece di 80% indicato nel piano. Prezzo netto dopo sconto -0.40",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "cioccolato_78",
+      "descrizione": "TAV.EXCELL.78%CACAO",
+      "nomePiano": "Cioccolato fondente 80% (variante 78%)",
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "prezzo": 3.29,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        7.38
+      ],
+      "note": "78% invece di 80% indicato nel piano. Prezzo netto per singola tavoletta dopo sconto (7.38-0.80)/2",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "succo_arancia",
+      "descrizione": "SUCCO S/ZUC.AGG.ARANCIA",
+      "nomePiano": "Succo arancia rossa 100%",
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "prezzo": 1.89,
+      "unita": "pezzo",
+      "iva": "D",
+      "occorrenze": [
+        1.89
+      ],
+      "note": "Senza zuccheri aggiunti - molto simile alla richiesta del piano",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "pizza_verdure",
+      "descrizione": "PIZZA LASAPORITA VERDURE",
+      "nomePiano": "Pizza vegetariana surgelata",
+      "categoria": "altro",
+      "tipoPrezzo": "confezione",
+      "prezzo": 2.69,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        2.69
+      ],
+      "note": "MATCH ESATTO col piano",
+      "presenteNelPiano": true
+    },
+    {
+      "id": "frulla_mela",
+      "descrizione": "FRULLA' BIO MELA DOY",
+      "categoria": "altro",
+      "prezzo": 0.98,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        0.98,
+        0.98,
+        0.98
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "ciliegie",
+      "descrizione": "CILIEGIA ITA CPQ 2",
+      "categoria": "frutta_verdura",
+      "prezzo": 1.49,
+      "unita": "acquisto",
+      "iva": "A",
+      "occorrenze": [
+        1.49,
+        1.49
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "peso_variabile",
+      "note": ""
+    },
+    {
+      "id": "ananas",
+      "descrizione": "ANANAS",
+      "categoria": "frutta_verdura",
+      "prezzo": 1.77,
+      "unita": "acquisto",
+      "iva": "A",
+      "occorrenze": [
+        1.77
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "peso_variabile",
+      "note": ""
+    },
+    {
+      "id": "cetrioli",
+      "descrizione": "CETRIOLI",
+      "categoria": "frutta_verdura",
+      "prezzo": 0.54,
+      "unita": "acquisto",
+      "iva": "A",
+      "occorrenze": [
+        0.54
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "peso_variabile",
+      "note": ""
+    },
+    {
+      "id": "semi_chia",
+      "descrizione": "SEMI DI CHIA NERA",
+      "categoria": "condimenti",
+      "prezzo": 2.69,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        2.69
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "prosciutto_cotto",
+      "descrizione": "PROSC.COTTO A.Q.F&C",
+      "categoria": "carne_pesce",
+      "prezzo": 1.79,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        1.79
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "piadina_olio",
+      "descrizione": "PIADINA FRESCA OLIO",
+      "categoria": "cereali_pane",
+      "prezzo": 1.99,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        1.99
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "mortadella",
+      "descrizione": "MORTADELLA IGP FIRMA",
+      "categoria": "carne_pesce",
+      "prezzo": 2.72,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        4.98
+      ],
+      "note": "netto dopo sconto -2.26",
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione"
+    },
+    {
+      "id": "pasta_brisee",
+      "descrizione": "PASTA BRISEE CONAD",
+      "categoria": "altro",
+      "prezzo": 1.15,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        1.15
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "pasta_pizza",
+      "descrizione": "PASTA PER PIZZA",
+      "categoria": "altro",
+      "prezzo": 1.49,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        1.49
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "pasta_sfoglia_rett",
+      "descrizione": "PASTA SFOGLIA RETTANGOLARE",
+      "categoria": "altro",
+      "prezzo": 1.15,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        1.15
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "pasta_sfoglia_rot",
+      "descrizione": "PASTA SFOGLIA ROTONDA",
+      "categoria": "altro",
+      "prezzo": 1.15,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        1.15
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "fioc_fond",
+      "descrizione": "FIOC.FR.INT.FOND.PIA",
+      "categoria": "altro",
+      "prezzo": 2.59,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        2.59
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "cavallo_sfilacci",
+      "descrizione": "CAVALLO SFILACCI X1",
+      "categoria": "carne_pesce",
+      "prezzo": 4.8,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        4.8,
+        4.8
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "mozzarella_grande",
+      "descrizione": "MOZZARELLA P",
+      "categoria": "latticini",
+      "prezzo": 3.19,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        3.19
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "mayo",
+      "descrizione": "MAYO TD HEINZ 395g",
+      "categoria": "condimenti",
+      "prezzo": 1.99,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        3.19
+      ],
+      "note": "netto dopo sconto -1.20",
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione"
+    },
+    {
+      "id": "patatine",
+      "descrizione": "PATATINE CLASSICHE S",
+      "categoria": "altro",
+      "prezzo": 4.19,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        4.19
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "cetrioli_sacla",
+      "descrizione": "CETRIOLI SACLA 290g",
+      "categoria": "condimenti",
+      "prezzo": 1.79,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        1.79
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "cipolline_aceto",
+      "descrizione": "CIPOLLINE ACETO CONAD",
+      "categoria": "condimenti",
+      "prezzo": 0.99,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        0.99
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "pomodori_secchi",
+      "descrizione": "POMODORI SECCHI OLIO",
+      "categoria": "condimenti",
+      "prezzo": 2.39,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        2.39
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "taralli",
+      "descrizione": "TARALLI FINOCCHIO",
+      "categoria": "altro",
+      "prezzo": 1.59,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        1.59
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "estathe_limone",
+      "descrizione": "ESTATHE BOTT.LIMONE/PET",
+      "categoria": "bevande",
+      "prezzo": 1.69,
+      "unita": "pezzo",
+      "iva": "D",
+      "occorrenze": [
+        1.99,
+        1.99
+      ],
+      "note": "netto dopo sconti",
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione"
+    },
+    {
+      "id": "coca_cola",
+      "descrizione": "COCA COLA REGULAR/ZERO",
+      "categoria": "bevande",
+      "prezzo": 2.29,
+      "unita": "pezzo",
+      "iva": "D",
+      "occorrenze": [
+        2.29,
+        3.89
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "taccole",
+      "descrizione": "TACCOLE BONDUELLE",
+      "categoria": "frutta_verdura",
+      "prezzo": 1.89,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        1.89
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "edamer",
+      "descrizione": "EDAMER A FETTE BAYER",
+      "categoria": "latticini",
+      "prezzo": 2.15,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        2.14,
+        2.16
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "fatina_mandorle",
+      "descrizione": "FATINA MAND.TOST.NO",
+      "categoria": "altro",
+      "prezzo": 2.79,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        2.79
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "frulla_mela_fragola",
+      "descrizione": "FRULLA'BIO MELA-FRAGOLA",
+      "categoria": "altro",
+      "prezzo": 0.98,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        0.98,
+        0.98
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "yog_vipiteno",
+      "descrizione": "YOG.VIPITENO MAGRO",
+      "categoria": "latticini",
+      "prezzo": 0.89,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        0.89
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "mozzarella_no_lattosio",
+      "descrizione": "MOZZARELLA SENZA LATTOSIO",
+      "categoria": "latticini",
+      "prezzo": 1.19,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        1.45
+      ],
+      "note": "netto dopo sconto -0.26",
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione"
+    },
+    {
+      "id": "nutella",
+      "descrizione": "NUTELLA COPPETTA X6",
+      "categoria": "altro",
+      "prezzo": 1.69,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        1.69
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "piadina_snack",
+      "descrizione": "PIADINA SNACK CLASSICA",
+      "categoria": "altro",
+      "prezzo": 1.59,
+      "unita": "pezzo",
+      "iva": "A",
+      "occorrenze": [
+        2.29
+      ],
+      "note": "netto dopo sconto -0.70",
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione"
+    },
+    {
+      "id": "candeggina",
+      "descrizione": "CAND CONAD PROFUMATA",
+      "categoria": "non_alimentare",
+      "prezzo": 1.69,
+      "unita": "pezzo",
+      "iva": "D",
+      "occorrenze": [
+        1.69
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "sale_lavastoviglie",
+      "descrizione": "SALE PER LAVASTOVIGLIE",
+      "categoria": "non_alimentare",
+      "prezzo": 1.39,
+      "unita": "pezzo",
+      "iva": "D",
+      "occorrenze": [
+        1.39
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "pizza_prosciutto",
+      "descrizione": "PIZZA LASAPORITA PROSCIUTTO",
+      "categoria": "altro",
+      "prezzo": 2.69,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        2.69
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "tris_grigliato",
+      "descrizione": "TRIS GRIGLIATO + GUSTO",
+      "categoria": "frutta_verdura",
+      "prezzo": 2.49,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        2.49
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "gnocchetti_sorrentina",
+      "descrizione": "GNOCCHETTI ALLA SORRENTINA",
+      "categoria": "altro",
+      "prezzo": 3.99,
+      "unita": "pezzo",
+      "iva": "C",
+      "occorrenze": [
+        3.99
+      ],
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "confezione",
+      "note": ""
+    },
+    {
+      "id": "banco_tradizionale",
+      "descrizione": "BANCO TRADIZIONALE (generico)",
+      "categoria": "altro",
+      "prezzo": 3.45,
+      "unita": "acquisto",
+      "iva": "C",
+      "occorrenze": [
+        3.1,
+        4.16
+      ],
+      "note": "Voce generica banco gastronomia/macelleria, non specifica",
+      "presenteNelPiano": false,
+      "nomePiano": null,
+      "tipoPrezzo": "peso_variabile"
+    }
+  ]
+}
