@@ -8,8 +8,8 @@
     "fs:allow-read-text-file",
     "fs:allow-write-text-file",
     "fs:allow-exists",
-    "fs:allow-app-local-data-dir",
-    "fs:allow-document-dir",
+    "fs:scope-applocaldata-recursive",
+    "fs:scope-document-recursive",
     "dialog:allow-open",
     "dialog:allow-save"
   ]
